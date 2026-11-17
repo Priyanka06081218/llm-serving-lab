@@ -48,3 +48,23 @@ One more thing I noticed: mean inter-token latency was 36.09 ms and mean time pe
 
 **Re-check.** After a vLLM upgrade, and after the concurrency 32 run.
 
+## F-003: How vLLM picks K for Dynamic SD (code reading)
+
+**What I found.** Each time vLLM plans one step of work, it first decides which requests run in that step. Dynamic SD uses how many requests that is to look up K in my table. It counts requests, not tokens, so ten short requests and ten long ones both count as 10.
+
+The count includes requests that are still reading their prompt, not only the ones already generating. The scheduler adds requests to the step's list in two places. One is the requests that are already running, and some of those are still working through a long prompt in pieces. The other is the requests taken from the waiting line, which are new ones and ones that were paused and are now resuming. The K lookup happens after both.
+
+**How I checked.** I only read the code. It is in vLLM v0.33.0, file `vllm/v1/core/sched/scheduler.py`, inside the function `schedule()`. The two places are at lines 1001 and 1569, and the K lookup is at lines 1709 to 1714. I did not run anything on a GPU for this one.
+
+**Not checked yet.**
+- Whether a request that is still reading its prompt gets draft tokens in that step. If it doesn't, my table's count includes requests that K doesn't really apply to.
+- What the code does between lines 1569 and 1709. I only know the lookup comes after the two places because of the line numbers.
+- Whether the table picks the right K at concurrency 32. That needs a GPU run.
+
+**Upstream state.** This is true for vLLM v0.33.0.
+
+**Re-check.** If I change the vLLM version, read these lines again first, because the scheduler changes often and this may no longer be true.
+
+**Prediction to test (not run yet).** If K really depends on the number of requests in a step, then with my table (K=3 for 1 to 16 requests, K=1 for 17 to 64), a run with 32 requests in flight should show about 1 draft token per draft. I get that number from the `/metrics` page by dividing total draft tokens by total drafts. It won't be exactly 1.00, because at the start and end of the run fewer than 17 requests are in a step, and those steps use K=3. I'll call the prediction confirmed if the ratio is below 1.5, and wrong if it is near 3.00 like the concurrency-4 run. Anything in between means I have to find out why before I conclude anything. I'm writing the threshold down now, before the run, so I can't move it afterwards. The run needs a fresh server so counters from earlier runs aren't mixed in.
+
+The question about requests that are still reading their prompt needs its own test, which I haven't designed yet.
