@@ -1,6 +1,6 @@
 # Findings
 
-Entry format: Fact → Hypothesis → Experiment → Result → Upstream State → Re-check
+Each entry says what I found, how I checked it, what I still need to check, which vLLM version it is true for, and when to look at it again.
 
 ## F-001: KV cache size per token (Qwen3-8B, BF16)
 
