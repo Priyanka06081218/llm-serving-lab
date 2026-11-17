@@ -1,6 +1,6 @@
 # LLM Serving Lab
 
-**Status: In progress — experiments haven't started yet.**
+**Status: In progress — setup and a smoke test are done, the benchmark harness is next. No benchmark results yet.**
 
 ## What am I trying to find out?
 
@@ -17,7 +17,7 @@ In this project, I want to understand how well that approach works under differe
 The plan is to run controlled experiments and compare the results rather than assume one configuration is always better.
 
 - **Serving engine:** vLLM, running on a single GPU.
-- **Model:** Qwen3-8B with an EAGLE-3 draft model, subject to the initial feasibility test.
+- **Model:** Qwen3-8B with an EAGLE-3 draft model. A smoke test ran this pair once on one A40, so it works, but that alone does not make it the right choice for the full experiments.
 - **Configurations:** Standard generation without speculation, fixed K=1, fixed K=3, and Dynamic SD.
 - **Workloads:** One workload to build the Dynamic SD lookup table and another held-out workload to test how well it generalizes.
 - **Traffic:** Controlled request arrival rates using `vllm bench serve`, including Poisson arrivals.
@@ -39,8 +39,8 @@ The goal isn't to prove that Dynamic SD is faster. It's to find out where it wor
 | Stage | Status |
 |---|---|
 | Set up the repo and start the `FINDINGS.md` notebook | Done. Entries get added as I verify things |
-| Read how vLLM picks K for Dynamic SD | In progress |
-| GPU feasibility test | Not started |
+| Read how vLLM picks K for Dynamic SD | Code reading done (F-003). Runtime check at concurrency 32 still to do |
+| GPU feasibility test | Done on one A40 (F-001, F-002). Concurrency 32 check and one benchmark oddity still open |
 | Benchmark harness | Not started |
 | Experiments and analysis | Not started |
 
