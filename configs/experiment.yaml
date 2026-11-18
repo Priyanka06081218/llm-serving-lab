@@ -1,0 +1,42 @@
+# What to run. The harness reads this file and runs nothing that is not written here.
+
+model: Qwen/Qwen3-8B
+speculator: RedHatAI/Qwen3-8B-speculator.eagle3
+vllm_version: 0.33.0
+max_model_len: 4096
+
+# The four configurations. "off" means no speculative config at all.
+arms:
+  off: {}
+  k1: {k: 1}
+  k3: {k: 3}
+  dynamic: {table: from_profile}
+
+# Two workloads. The profile one is used to build the Dynamic SD table.
+# The held-out one is only used to test it.
+workloads:
+  profile:
+    dataset: null
+    num_prompts: null
+    rates: [null, null, null, null]   # requests per second
+  heldout:
+    dataset: null
+    num_prompts: null
+    rates: [null, null]
+
+repeats: 2
+temperature: 0
+
+# What counts as "fast enough" when I measure goodput.
+goodput_target:
+  ttft_ms: null
+  tpot_ms: null
+
+# When I will say Dynamic SD hurt.
+harm_rule:
+  worse_than_off_by_more_than_percent: 2
+  needs_non_overlapping_ci: true
+
+budget:
+  hard_cap_usd: null            # my own limit, set before the first paid run
+  gpu_price_per_hour_usd: null

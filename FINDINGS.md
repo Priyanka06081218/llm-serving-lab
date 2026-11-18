@@ -68,3 +68,23 @@ The count includes requests that are still reading their prompt, not only the on
 **Prediction to test (not run yet).** If K really depends on the number of requests in a step, then with my table (K=3 for 1 to 16 requests, K=1 for 17 to 64), a run with 32 requests in flight should show about 1 draft token per draft. I get that number from the `/metrics` page by dividing total draft tokens by total drafts. It won't be exactly 1.00, because at the start and end of the run fewer than 17 requests are in a step, and those steps use K=3. I'll call the prediction confirmed if the ratio is below 1.5, and wrong if it is near 3.00 like the concurrency-4 run. Anything in between means I have to find out why before I conclude anything. I'm writing the threshold down now, before the run, so I can't move it afterwards. The run needs a fresh server so counters from earlier runs aren't mixed in.
 
 The question about requests that are still reading their prompt needs its own test, which I haven't designed yet.
+
+## F-004: Spec-Bench prompt lengths (measured with the Qwen3 tokenizer)
+
+**What I found.** All 480 prompts fit comfortably in the 4,096-token limit. The longest is 1,500 tokens (a summarization prompt), well under the 3,840 I can allow once I leave 256 tokens for the answer. The counts include the chat template with thinking off, which is what the server will build.
+
+The prompts fall into two groups. Most categories are short: qa has a median of 23 tokens, translation 51, math_reasoning 66, and the eight 10-question categories have medians between 31 and 219. Summarization (median 672, longest 1,500) and rag (median 735, longest 855) are much longer. That is the biggest difference between the workloads this dataset offers.
+
+Estimate: even 64 requests of the longest size (1,500 prompt tokens plus 256 output tokens) need about 112,000 tokens of KV cache. F-001 measured about 148,000 with the speculator loaded, so memory should not be the limit. The server's startup log will confirm this.
+
+**What this means for my experiments.** Any split into a profile workload and a held-out workload will mostly be a split between short-prompt and long-prompt traffic. If I put summarization and rag on one side, the two workloads differ in how much prompt each request carries, and not only in what kind of text it is. I will keep that in mind when I read any difference between the profile and held-out results.
+
+**How I checked.** I ran `scripts/check_prompt_lengths.py` on my Mac with Transformers 4.57.1. The tokenizer repo revision was b968826d9c46dd6066d109eabc6255188de91218, and the dataset file matched SHA-256 4b6d33e79484f9841c487ee87d1cf6aa8c6066f61d5d482ff09e5a007fafdf04. The full output is in `docs/prompt-lengths.txt`.
+
+**Not checked yet.**
+- How long the answers are. Prompt lengths say nothing about output lengths. The qa questions may get very short answers, which would give speculation little to work with. I will measure output lengths in the validation session, using only the server without speculation.
+- Which categories go into which workload. That is not decided.
+
+**Upstream state.** This is about the dataset, not vLLM. The data is pinned by the hash above, and Spec-Bench's main branch can change.
+
+**Re-check.** If the dataset file, the tokenizer revision or the context limit changes.
