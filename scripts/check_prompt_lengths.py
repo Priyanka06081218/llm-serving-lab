@@ -7,13 +7,13 @@ import math
 import statistics
 import sys
 
-import huggingface_hub
 import transformers
 from transformers import AutoTokenizer
 
 MODEL = "Qwen/Qwen3-8B"
 MAX_MODEL_LEN = 4096
 OUTPUT_LEN = 256
+TOKENIZER_REVISION = "b968826d9c46dd6066d109eabc6255188de91218"
 # Must match dataset.source_sha256 in configs/experiment.yaml
 EXPECTED_SHA256 = "4b6d33e79484f9841c487ee87d1cf6aa8c6066f61d5d482ff09e5a007fafdf04"
 
@@ -26,13 +26,9 @@ if actual_sha256 != EXPECTED_SHA256:
 print("Dataset SHA-256 verified:", actual_sha256)
 
 print("transformers version:", transformers.__version__)
-try:
-    revision = huggingface_hub.model_info(MODEL).sha
-except Exception as err:
-    revision = f"unknown ({err})"
-print("tokenizer repo revision:", revision)
+print("tokenizer repo revision (pinned):", TOKENIZER_REVISION)
 
-tok = AutoTokenizer.from_pretrained(MODEL)
+tok = AutoTokenizer.from_pretrained(MODEL, revision=TOKENIZER_REVISION)
 
 by_category = collections.defaultdict(list)
 with open(path) as f:

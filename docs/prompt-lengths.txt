@@ -1,6 +1,6 @@
 Dataset SHA-256 verified: 4b6d33e79484f9841c487ee87d1cf6aa8c6066f61d5d482ff09e5a007fafdf04
 transformers version: 4.57.1
-tokenizer repo revision: b968826d9c46dd6066d109eabc6255188de91218
+tokenizer repo revision (pinned): b968826d9c46dd6066d109eabc6255188de91218
 writing         n= 10  min=   34  median=   47  p95=  108  max=  108  over_budget=0
 roleplay        n= 10  min=   44  median=   67  p95=  105  max=  105  over_budget=0
 reasoning       n= 10  min=   30  median=   49  p95=  212  max=  212  over_budget=0
