@@ -39,4 +39,5 @@ harm_rule:
 
 budget:
   hard_cap_usd: null            # my own limit, set before the first paid run
-  gpu_price_per_hour_usd: null
+  gpu_price_per_hour_usd: 0.59   # RunPod public list price for the A40 (12 Nov 2026); confirm in the console at deploy
+  max_session_hours: 3           # stop the pod by then, whatever has finished
