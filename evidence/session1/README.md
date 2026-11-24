@@ -38,7 +38,7 @@ Every line should say OK. The original archive downloaded from the pod was `sess
 ## Known limits (read before using any number from here)
 
 - Each configuration was run once. We have no measure of run-to-run noise yet.
-- Prefix caching was on for every server (vLLM's default). About 52% of prefix queries hit the cache when it was measured mid-session. Later runs reused earlier prompts, so first-token times are not comparable between a fresh server and a warm one.
+- Prefix caching was on for every server (vLLM's default). All three server logs show `enable_prefix_caching=True`. A hit rate of about 52% was read from the live metrics page mid-session, but that reading was not saved in these files. Later runs reused earlier prompts, so first-token times are not comparable between a fresh server and a warm one.
 - The dynamic server ran in CUDA graph mode `PIECEWISE`. The baseline and static servers ran `FULL_AND_PIECEWISE`. This is a known confound for any dynamic-versus-other comparison.
 - The benchmark tool's "Peak concurrent requests" value is unreliable (it read 13 at a limit of 8). Use the server gauge in `running_*.csv` instead.
 - The MT-bench categories (coding, extraction, humanities, math, reasoning, roleplay, stem, writing) have only 10 prompts each. Do not make per-category claims from them.
