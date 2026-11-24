@@ -1,0 +1,842 @@
+== Baseline server: no speculation ==
+Session clock: 5 min used, about $0.06 of GPU time at list price (the RunPod console shows the real bill).
+Starting server 'off'. Log: /workspace/logs/server_off.log
+Server 'off' is up after about 100 seconds.
+== Startup facts from the log ==
+(EngineCore pid=1306) INFO 11-23 23:21:48 [core.py:139] Initializing a V1 LLM engine (v0.33.0) with config: model='Qwen/Qwen3-8B', speculative_config=None, tokenizer='Qwen/Qwen3-8B', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, aux_output_config=AuxOutputConfig(enable_return_routed_experts=False, max_bytes=None), kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, custom_histogram_buckets=None, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=Qwen/Qwen3-8B, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['none'], 'ir_enable_torch_wrap': True, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::qwen4_exp_ple_short_conv', 'vllm::qwen4_exp_qsa_with_output', 'vllm::qwen4_exp_qsa_prepare_with_output', 'vllm::linear_attention', 'vllm::qwen_gdn_attention_core', 'vllm::qwen_gdn_attention_core_fused_norm_packed', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'cudagraph_decoder_replay': True, 'decoder_replay_cudagraph_capture_sizes': [], 'decoder_replay_trim_threshold': 768, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 128, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['triton', 'native']), enable_flashinfer_autotune=True, enable_rocm_segmented_attn_autotune=False, enable_cutedsl_warmup=True, enable_jit_warmup=True, monokernel=False, moe_backend='auto', sparse_indexer_topk_backend='auto', linear_backend='auto', linear_backend_per_quant=None)
+(EngineCore pid=1306) INFO 11-23 23:21:58 [utils.py:381] Using LBNHC KV cache layout.
+(EngineCore pid=1306) INFO 11-23 23:22:32 [gpu_model_runner.py:6304] Profiling CUDA graph memory: PIECEWISE=19 (largest=128), FULL=11 (largest=64)
+(EngineCore pid=1306) INFO 11-23 23:22:34 [gpu_model_runner.py:6409] Estimated CUDA graph memory: 0.20 GiB total
+(EngineCore pid=1306) INFO 11-23 23:22:34 [gpu_worker.py:772] Available KV cache memory: 23.29 GiB
+(EngineCore pid=1306) INFO 11-23 23:22:34 [gpu_worker.py:787] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9000 is equivalent to --gpu-memory-utilization=0.8956 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9044. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=1306) INFO 11-23 23:22:34 [kv_cache_utils.py:1147] GPU KV cache size: 169,568 tokens, Maximum concurrency for 4,096 tokens per request: 41.40x
+(EngineCore pid=1306) INFO 11-23 23:22:48 [gpu_model_runner.py:6470] Rank 0: Torch profiler disabled for CUDA graph capture
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   0%|          | 0/19 [00:00<?, ?it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  11%|█         | 2/19 [00:00<00:01, 13.49it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  21%|██        | 4/19 [00:00<00:01, 13.49it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  32%|███▏      | 6/19 [00:00<00:00, 14.21it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  42%|████▏     | 8/19 [00:00<00:00, 14.35it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  53%|█████▎    | 10/19 [00:00<00:00, 14.58it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  63%|██████▎   | 12/19 [00:00<00:00, 14.29it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  74%|███████▎  | 14/19 [00:00<00:00, 14.72it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  84%|████████▍ | 16/19 [00:01<00:00, 15.16it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  95%|█████████▍| 18/19 [00:01<00:00, 15.57it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 19/19 [00:01<00:00, 14.84it/s]
+Capturing CUDA graphs (decode, FULL):   0%|          | 0/11 [00:00<?, ?it/s]Capturing CUDA graphs (decode, FULL):  18%|█▊        | 2/11 [00:00<00:00, 16.37it/s]Capturing CUDA graphs (decode, FULL):  36%|███▋      | 4/11 [00:00<00:00, 17.54it/s]Capturing CUDA graphs (decode, FULL):  55%|█████▍    | 6/11 [00:00<00:00, 18.24it/s]Capturing CUDA graphs (decode, FULL):  73%|███████▎  | 8/11 [00:00<00:00, 18.30it/s]Capturing CUDA graphs (decode, FULL): 100%|██████████| 11/11 [00:00<00:00, 19.09it/s]Capturing CUDA graphs (decode, FULL): 100%|██████████| 11/11 [00:00<00:00, 18.55it/s]
+(EngineCore pid=1306) INFO 11-23 23:22:50 [gpu_worker.py:1003] CUDA graph pool memory: 0.18 GiB (actual), 0.2 GiB (estimated), difference: 0.01 GiB (7.4%).
+(EngineCore pid=1306) INFO 11-23 23:22:50 [gpu_worker.py:1066] Free memory on device (44.08/44.42 GiB) on startup. Desired GPU memory utilization is (0.9, 39.98 GiB). Actual usage is 15.34 GiB for consumed memory (weights + non-torch), 1.35 GiB for peak activation, and 0.18 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=24650926080` (22.96 GiB) to fit into requested memory, or `--kv-cache-memory=29053700096` (27.06 GiB) to fully utilize gpu memory. Current kv cache memory in use is 23.29 GiB.
+(EngineCore pid=1306) INFO 11-23 23:22:52 [core.py:405] init engine (profile, create kv cache, warmup model) took 54.17 s (compilation: 25.28 s)
+
+Session clock: 7 min used, about $0.07 of GPU time at list price (the RunPod console shows the real bill).
+== Chat path check ==
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+answer: The capital of France is Paris.
+prompt tokens reported by the server: 24
+tokens if the template is applied once : 24
+tokens if the template is applied twice: 36
+answer contains <think> text: False
+RESULT: the template was applied once. Good.
+
+Session clock: 8 min used, about $0.09 of GPU time at list price (the RunPod console shows the real bill).
+== Output length per category (baseline, concurrency 16) ==
+10 coding
+10 extraction
+10 humanities
+10 math
+80 math_reasoning
+80 qa
+80 rag
+10 reasoning
+10 roleplay
+10 stem
+80 summarization
+80 translation
+10 writing
+Session clock: 11 min used, about $0.11 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_coding': concurrency 16, 10 prompts ...
+The benchmark failed. Last lines of /workspace/logs/bench_len_coding.log:
+    return asyncio.run(main_async(args))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/workspace/vllm-env/lib/python3.12/site-packages/vllm/benchmarks/serve.py", line 2213, in main_async
+    input_requests = get_samples(args, tokenizer)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/vllm-env/lib/python3.12/site-packages/vllm/benchmarks/datasets/datasets.py", line 2413, in get_samples
+    input_requests = dataset_mapping[args.dataset_name]()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/vllm-env/lib/python3.12/site-packages/vllm/benchmarks/datasets/datasets.py", line 2291, in <lambda>
+    "spec_bench": lambda: SpecBench(
+                          ^^^^^^^^^^
+  File "/workspace/vllm-env/lib/python3.12/site-packages/vllm/benchmarks/datasets/datasets.py", line 2954, in __init__
+    super().__init__(**kwargs)
+  File "/workspace/vllm-env/lib/python3.12/site-packages/vllm/benchmarks/datasets/datasets.py", line 2439, in __init__
+    self.load_data()
+  File "/workspace/vllm-env/lib/python3.12/site-packages/vllm/benchmarks/datasets/datasets.py", line 2964, in load_data
+    jsonl_data = pd.read_json(path_or_buf=self.dataset_path, lines=True)
+                 ^^^^^^^^^^^^
+  File "/workspace/vllm-env/lib/python3.12/site-packages/vllm/utils/import_utils.py", line 321, in __getattr__
+    raise ImportError(msg) from exc
+ImportError: Please install vllm[bench] for bench support
+== Output length per category (baseline, concurrency 16) ==
+10 coding
+10 extraction
+10 humanities
+10 math
+80 math_reasoning
+80 qa
+80 rag
+10 reasoning
+10 roleplay
+10 stem
+80 summarization
+80 translation
+10 writing
+Session clock: 16 min used, about $0.16 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_coding': concurrency 16, 10 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x71f38172c400>, trust_remote_code=False, seed=0, num_prompts=10, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='coding', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_coding.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-dbde5016-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     10        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  8.03      
+Request throughput (req/s):              1.25      
+Output token throughput (tok/s):         317.38    
+Peak output token throughput (tok/s):    330.00    
+Peak concurrent requests:                10.00     
+Total token throughput (tok/s):          393.27    
+Mean TTFT (ms):                          160.54    
+Median TTFT (ms):                        159.45    
+P50 TTFT (ms):                           159.45    
+P90 TTFT (ms):                           191.85    
+P95 TTFT (ms):                           191.89    
+P99 TTFT (ms):                           191.92    
+Mean TPOT (ms):                          30.73     
+Median TPOT (ms):                        30.73     
+P50 TPOT (ms):                           30.73     
+P90 TPOT (ms):                           30.74     
+P95 TPOT (ms):                           30.78     
+P99 TPOT (ms):                           30.81     
+Session clock: 16 min used, about $0.16 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_extraction': concurrency 16, 10 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7f05bff3e7a0>, trust_remote_code=False, seed=0, num_prompts=10, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='extraction', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_extraction.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-9fdfd3cc-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     10        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  7.92      
+Request throughput (req/s):              1.26      
+Output token throughput (tok/s):         103.44    
+Peak output token throughput (tok/s):    209.00    
+Peak concurrent requests:                10.00     
+Total token throughput (tok/s):          429.42    
+Mean TTFT (ms):                          364.43    
+Median TTFT (ms):                        389.73    
+P50 TTFT (ms):                           389.73    
+P90 TTFT (ms):                           391.08    
+P95 TTFT (ms):                           391.69    
+P99 TTFT (ms):                           392.18    
+Mean TPOT (ms):                          32.79     
+Median TPOT (ms):                        30.01     
+P50 TPOT (ms):                           30.01     
+P90 TPOT (ms):                           33.11     
+P95 TPOT (ms):                           45.64     
+P99 TPOT (ms):                           55.67     
+Session clock: 17 min used, about $0.17 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_humanities': concurrency 16, 10 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x752f4c8a27a0>, trust_remote_code=False, seed=0, num_prompts=10, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='humanities', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_humanities.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-706a8fed-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     10        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  7.99      
+Request throughput (req/s):              1.25      
+Output token throughput (tok/s):         320.54    
+Peak output token throughput (tok/s):    330.00    
+Peak concurrent requests:                10.00     
+Total token throughput (tok/s):          373.38    
+Mean TTFT (ms):                          153.65    
+Median TTFT (ms):                        157.45    
+P50 TTFT (ms):                           157.45    
+P90 TTFT (ms):                           158.45    
+P95 TTFT (ms):                           158.81    
+P99 TTFT (ms):                           159.10    
+Mean TPOT (ms):                          30.68     
+Median TPOT (ms):                        30.68     
+P50 TPOT (ms):                           30.68     
+P90 TPOT (ms):                           30.69     
+P95 TPOT (ms):                           30.70     
+P99 TPOT (ms):                           30.70     
+Session clock: 17 min used, about $0.17 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_math': concurrency 16, 10 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x75ef6678a340>, trust_remote_code=False, seed=0, num_prompts=10, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='math', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_math.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-42810198-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     10        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  7.91      
+Request throughput (req/s):              1.26      
+Output token throughput (tok/s):         285.45    
+Peak output token throughput (tok/s):    330.00    
+Peak concurrent requests:                10.00     
+Total token throughput (tok/s):          363.70    
+Mean TTFT (ms):                          145.15    
+Median TTFT (ms):                        149.66    
+P50 TTFT (ms):                           149.66    
+P90 TTFT (ms):                           150.19    
+P95 TTFT (ms):                           150.23    
+P99 TTFT (ms):                           150.26    
+Mean TPOT (ms):                          30.47     
+Median TPOT (ms):                        30.42     
+P50 TPOT (ms):                           30.42     
+P90 TPOT (ms):                           30.57     
+P95 TPOT (ms):                           30.63     
+P99 TPOT (ms):                           30.68     
+Session clock: 18 min used, about $0.18 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_math_reasoning': concurrency 16, 80 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7228e40f6840>, trust_remote_code=False, seed=0, num_prompts=80, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='math_reasoning', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_math_reasoning.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-9284c2e5-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     80        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  36.91     
+Request throughput (req/s):              2.17      
+Output token throughput (tok/s):         456.63    
+Peak output token throughput (tok/s):    528.00    
+Peak concurrent requests:                27.00     
+Total token throughput (tok/s):          628.42    
+Mean TTFT (ms):                          146.09    
+Median TTFT (ms):                        102.81    
+P50 TTFT (ms):                           102.81    
+P90 TTFT (ms):                           269.79    
+P95 TTFT (ms):                           270.14    
+P99 TTFT (ms):                           272.57    
+Mean TPOT (ms):                          31.38     
+Median TPOT (ms):                        31.46     
+P50 TPOT (ms):                           31.46     
+P90 TPOT (ms):                           31.63     
+P95 TPOT (ms):                           31.70     
+P99 TPOT (ms):                           31.78     
+Session clock: 19 min used, about $0.19 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_qa': concurrency 16, 80 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x77955a7d2340>, trust_remote_code=False, seed=0, num_prompts=80, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='qa', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_qa.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-3785eaa2-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     80        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  33.25     
+Request throughput (req/s):              2.41      
+Output token throughput (tok/s):         452.45    
+Peak output token throughput (tok/s):    526.00    
+Peak concurrent requests:                21.00     
+Total token throughput (tok/s):          528.26    
+Mean TTFT (ms):                          115.16    
+Median TTFT (ms):                        98.55     
+P50 TTFT (ms):                           98.55     
+P90 TTFT (ms):                           202.96    
+P95 TTFT (ms):                           203.76    
+P99 TTFT (ms):                           205.50    
+Mean TPOT (ms):                          31.05     
+Median TPOT (ms):                        31.14     
+P50 TPOT (ms):                           31.14     
+P90 TPOT (ms):                           31.20     
+P95 TPOT (ms):                           31.21     
+P99 TPOT (ms):                           31.24     
+Session clock: 19 min used, about $0.20 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_rag': concurrency 16, 80 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7d1e20ab22a0>, trust_remote_code=False, seed=0, num_prompts=80, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='rag', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_rag.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-e8c541a9-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     80        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  41.95     
+Request throughput (req/s):              1.91      
+Output token throughput (tok/s):         345.41    
+Peak output token throughput (tok/s):    480.00    
+Peak concurrent requests:                23.00     
+Total token throughput (tok/s):          1756.64   
+Mean TTFT (ms):                          405.65    
+Median TTFT (ms):                        203.62    
+P50 TTFT (ms):                           203.62    
+P90 TTFT (ms):                           1051.00   
+P95 TTFT (ms):                           1353.51   
+P99 TTFT (ms):                           1643.73   
+Mean TPOT (ms):                          40.10     
+Median TPOT (ms):                        40.86     
+P50 TPOT (ms):                           40.86     
+P90 TPOT (ms):                           42.85     
+P95 TPOT (ms):                           43.78     
+P99 TPOT (ms):                           45.54     
+Session clock: 21 min used, about $0.21 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_reasoning': concurrency 16, 10 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7e923c17a2a0>, trust_remote_code=False, seed=0, num_prompts=10, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='reasoning', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_reasoning.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-024f7d52-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     10        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  7.90      
+Request throughput (req/s):              1.27      
+Output token throughput (tok/s):         242.89    
+Peak output token throughput (tok/s):    314.00    
+Peak concurrent requests:                10.00     
+Total token throughput (tok/s):          346.04    
+Mean TTFT (ms):                          182.71    
+Median TTFT (ms):                        189.32    
+P50 TTFT (ms):                           189.32    
+P90 TTFT (ms):                           194.76    
+P95 TTFT (ms):                           208.13    
+P99 TTFT (ms):                           218.82    
+Mean TPOT (ms):                          30.41     
+Median TPOT (ms):                        30.26     
+P50 TPOT (ms):                           30.26     
+P90 TPOT (ms):                           30.63     
+P95 TPOT (ms):                           30.94     
+P99 TPOT (ms):                           31.18     
+Session clock: 21 min used, about $0.21 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_roleplay': concurrency 16, 10 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x722da6ac27a0>, trust_remote_code=False, seed=0, num_prompts=10, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='roleplay', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_roleplay.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-49dab126-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     10        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  7.91      
+Request throughput (req/s):              1.26      
+Output token throughput (tok/s):         251.87    
+Peak output token throughput (tok/s):    330.00    
+Peak concurrent requests:                10.00     
+Total token throughput (tok/s):          353.22    
+Mean TTFT (ms):                          186.97    
+Median TTFT (ms):                        194.17    
+P50 TTFT (ms):                           194.17    
+P90 TTFT (ms):                           196.31    
+P95 TTFT (ms):                           196.43    
+P99 TTFT (ms):                           196.53    
+Mean TPOT (ms):                          30.43     
+Median TPOT (ms):                        30.39     
+P50 TPOT (ms):                           30.39     
+P90 TPOT (ms):                           30.62     
+P95 TPOT (ms):                           30.71     
+P99 TPOT (ms):                           30.78     
+Session clock: 21 min used, about $0.22 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_stem': concurrency 16, 10 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7bfffa9d2340>, trust_remote_code=False, seed=0, num_prompts=10, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='stem', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_stem.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-89b0c87b-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     10        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  8.01      
+Request throughput (req/s):              1.25      
+Output token throughput (tok/s):         319.68    
+Peak output token throughput (tok/s):    330.00    
+Peak concurrent requests:                10.00     
+Total token throughput (tok/s):          391.49    
+Mean TTFT (ms):                          166.49    
+Median TTFT (ms):                        171.77    
+P50 TTFT (ms):                           171.77    
+P90 TTFT (ms):                           173.30    
+P95 TTFT (ms):                           173.37    
+P99 TTFT (ms):                           173.42    
+Mean TPOT (ms):                          30.71     
+Median TPOT (ms):                        30.71     
+P50 TPOT (ms):                           30.71     
+P90 TPOT (ms):                           30.72     
+P95 TPOT (ms):                           30.76     
+P99 TPOT (ms):                           30.79     
+Session clock: 22 min used, about $0.22 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_summarization': concurrency 16, 80 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7fcd37186340>, trust_remote_code=False, seed=0, num_prompts=80, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='summarization', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_summarization.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-7617d641-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     80        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  44.11     
+Request throughput (req/s):              1.81      
+Output token throughput (tok/s):         352.74    
+Peak output token throughput (tok/s):    480.00    
+Peak concurrent requests:                20.00     
+Total token throughput (tok/s):          1713.50   
+Mean TTFT (ms):                          358.19    
+Median TTFT (ms):                        227.09    
+P50 TTFT (ms):                           227.09    
+P90 TTFT (ms):                           764.36    
+P95 TTFT (ms):                           1348.16   
+P99 TTFT (ms):                           1589.03   
+Mean TPOT (ms):                          40.27     
+Median TPOT (ms):                        40.80     
+P50 TPOT (ms):                           40.80     
+P90 TPOT (ms):                           43.47     
+P95 TPOT (ms):                           43.87     
+P99 TPOT (ms):                           44.97     
+Session clock: 23 min used, about $0.23 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_translation': concurrency 16, 80 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x749ba32aa2a0>, trust_remote_code=False, seed=0, num_prompts=80, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='translation', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_translation.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-5d6a72bf-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     80        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  5.45      
+Request throughput (req/s):              14.69     
+Output token throughput (tok/s):         382.97    
+Peak output token throughput (tok/s):    451.00    
+Peak concurrent requests:                37.00     
+Total token throughput (tok/s):          1282.55   
+Mean TTFT (ms):                          128.29    
+Median TTFT (ms):                        105.18    
+P50 TTFT (ms):                           105.18    
+P90 TTFT (ms):                           233.07    
+P95 TTFT (ms):                           233.53    
+P99 TTFT (ms):                           234.34    
+Mean TPOT (ms):                          32.70     
+Median TPOT (ms):                        32.88     
+P50 TPOT (ms):                           32.88     
+P90 TPOT (ms):                           33.86     
+P95 TPOT (ms):                           34.18     
+P99 TPOT (ms):                           35.60     
+Session clock: 23 min used, about $0.23 of GPU time at list price (the RunPod console shows the real bill).
+Running 'len_writing': concurrency 16, 10 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7f12b0836340>, trust_remote_code=False, seed=0, num_prompts=10, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category='writing', sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='len_writing.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-1ae12cd2-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     10        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  7.85      
+Request throughput (req/s):              1.27      
+Output token throughput (tok/s):         249.79    
+Peak output token throughput (tok/s):    330.00    
+Peak concurrent requests:                10.00     
+Total token throughput (tok/s):          328.09    
+Mean TTFT (ms):                          165.44    
+Median TTFT (ms):                        173.07    
+P50 TTFT (ms):                           173.07    
+P90 TTFT (ms):                           174.55    
+P95 TTFT (ms):                           175.17    
+P99 TTFT (ms):                           175.66    
+Mean TPOT (ms):                          30.31     
+Median TPOT (ms):                        30.28     
+P50 TPOT (ms):                           30.28     
+P90 TPOT (ms):                           30.55     
+P95 TPOT (ms):                           30.59     
+P99 TPOT (ms):                           30.61     
+== Summary ==
+run                          ok fail  req/s   tok/s  TTFT50  TTFT99  TPOT50  TPOT99  len50  len95   max  cap%
+len_coding                   10    0   1.25     317     159     192    30.7    30.8    256    256   256    90
+len_extraction               10    0   1.26     103     390     392    30.0    55.7     55    256   256    10
+len_humanities               10    0   1.25     321     157     159    30.7    30.7    256    256   256   100
+len_math                     10    0   1.26     285     150     150    30.4    30.7    256    256   256    70
+len_math_reasoning           80    0   2.17     457     103     273    31.5    31.8    236    256   256    42
+len_qa                       80    0   2.41     452      99     206    31.1    31.2    203    256   256    42
+len_rag                      80    0   1.91     345     204    1644    40.9    45.5    194    256   256    36
+len_reasoning                10    0   1.27     243     189     219    30.3    31.2    203    256   256    50
+len_roleplay                 10    0   1.26     252     194     197    30.4    30.8    160    256   256    50
+len_stem                     10    0   1.25     320     172     173    30.7    30.8    256    256   256   100
+len_summarization            80    0   1.81     353     227    1589    40.8    45.0    195    256   256    19
+len_translation              80    0  14.69     383     105     234    32.9    35.6     23     50    70     0
+len_writing                  10    0   1.27     250     173     176    30.3    30.6    182    256   256    30
+
+keys in the result file: backend, burstiness, completed, date, duration, endpoint_type, errors, failed, generated_texts, input_lens, itls, label, latencies, max_concurrency, max_concurrent_requests, max_output_tokens_per_s, mean_e2el_ms, mean_itl_ms, mean_tpot_ms, mean_ttft_ms, median_e2el_ms, median_itl_ms, median_tpot_ms, median_ttft_ms, model_id, num_prompts, output_lens, output_throughput, p50_e2el_ms, p50_itl_ms, p50_tpot_ms, p50_ttft_ms, p90_e2el_ms, p90_itl_ms, p90_tpot_ms, p90_ttft_ms, p95_e2el_ms, p95_itl_ms, p95_tpot_ms, p95_ttft_ms, p99_e2el_ms, p99_itl_ms, p99_tpot_ms, p99_ttft_ms, queue_times, request_goodput, request_rate, request_throughput, rtfx, start_times, std_e2el_ms, std_itl_ms, std_tpot_ms, std_ttft_ms, tokenizer_id, total_input_tokens, total_output_tokens, total_token_throughput, ttfts
+concurrency-related values in the first file: {'max_concurrency': 16, 'max_concurrent_requests': 10}
+
+Session clock: 24 min used, about $0.24 of GPU time at list price (the RunPod console shows the real bill).
+== Baseline capacity sweep (all categories mixed) ==
+Session clock: 31 min used, about $0.31 of GPU time at list price (the RunPod console shows the real bill).
+Running 'sweep_c01': concurrency 1, 24 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x72a5b75fa7a0>, trust_remote_code=False, seed=0, num_prompts=24, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=1, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='sweep_c01.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-78490a93-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 1
+Successful requests:                     24        
+Failed requests:                         0         
+Maximum request concurrency:             1         
+Benchmark duration (s):                  121.79    
+Request throughput (req/s):              0.20      
+Output token throughput (tok/s):         34.11     
+Peak output token throughput (tok/s):    35.00     
+Peak concurrent requests:                2.00      
+Total token throughput (tok/s):          78.54     
+Mean TTFT (ms):                          61.11     
+Median TTFT (ms):                        63.71     
+P50 TTFT (ms):                           63.71     
+P90 TTFT (ms):                           72.43     
+P95 TTFT (ms):                           75.21     
+P99 TTFT (ms):                           83.70     
+Mean TPOT (ms):                          29.11     
+Median TPOT (ms):                        29.09     
+P50 TPOT (ms):                           29.09     
+P90 TPOT (ms):                           29.21     
+P95 TPOT (ms):                           29.29     
+P99 TPOT (ms):                           29.36     
+Session clock: 34 min used, about $0.34 of GPU time at list price (the RunPod console shows the real bill).
+Running 'sweep_c02': concurrency 2, 32 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7061d90727a0>, trust_remote_code=False, seed=0, num_prompts=32, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=2, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='sweep_c02.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-c1139a7c-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 2
+Successful requests:                     32        
+Failed requests:                         0         
+Maximum request concurrency:             2         
+Benchmark duration (s):                  84.23     
+Request throughput (req/s):              0.38      
+Output token throughput (tok/s):         64.33     
+Peak output token throughput (tok/s):    70.00     
+Peak concurrent requests:                4.00      
+Total token throughput (tok/s):          161.23    
+Mean TTFT (ms):                          88.73     
+Median TTFT (ms):                        88.83     
+P50 TTFT (ms):                           88.83     
+P90 TTFT (ms):                           92.22     
+P95 TTFT (ms):                           94.63     
+P99 TTFT (ms):                           102.54    
+Mean TPOT (ms):                          29.37     
+Median TPOT (ms):                        29.36     
+P50 TPOT (ms):                           29.36     
+P90 TPOT (ms):                           29.53     
+P95 TPOT (ms):                           29.57     
+P99 TPOT (ms):                           29.59     
+Session clock: 36 min used, about $0.35 of GPU time at list price (the RunPod console shows the real bill).
+Running 'sweep_c04': concurrency 4, 48 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7309931aa2a0>, trust_remote_code=False, seed=0, num_prompts=48, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=4, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='sweep_c04.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-afa7ad6c-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 4
+Successful requests:                     48        
+Failed requests:                         0         
+Maximum request concurrency:             4         
+Benchmark duration (s):                  60.82     
+Request throughput (req/s):              0.79      
+Output token throughput (tok/s):         130.69    
+Peak output token throughput (tok/s):    136.00    
+Peak concurrent requests:                8.00      
+Total token throughput (tok/s):          355.09    
+Mean TTFT (ms):                          95.05     
+Median TTFT (ms):                        91.63     
+P50 TTFT (ms):                           91.63     
+P90 TTFT (ms):                           95.75     
+P95 TTFT (ms):                           118.86    
+P99 TTFT (ms):                           154.53    
+Mean TPOT (ms):                          29.76     
+Median TPOT (ms):                        29.71     
+P50 TPOT (ms):                           29.71     
+P90 TPOT (ms):                           30.10     
+P95 TPOT (ms):                           30.20     
+P99 TPOT (ms):                           30.51     
+Session clock: 37 min used, about $0.37 of GPU time at list price (the RunPod console shows the real bill).
+Running 'sweep_c08': concurrency 8, 64 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x750e1b1a62a0>, trust_remote_code=False, seed=0, num_prompts=64, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=8, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='sweep_c08.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-a13eec82-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 8
+Successful requests:                     64        
+Failed requests:                         0         
+Maximum request concurrency:             8         
+Benchmark duration (s):                  46.48     
+Request throughput (req/s):              1.38      
+Output token throughput (tok/s):         238.48    
+Peak output token throughput (tok/s):    270.00    
+Peak concurrent requests:                12.00     
+Total token throughput (tok/s):          671.77    
+Mean TTFT (ms):                          105.60    
+Median TTFT (ms):                        96.56     
+P50 TTFT (ms):                           96.56     
+P90 TTFT (ms):                           142.76    
+P95 TTFT (ms):                           144.72    
+P99 TTFT (ms):                           179.89    
+Mean TPOT (ms):                          30.59     
+Median TPOT (ms):                        30.67     
+P50 TPOT (ms):                           30.67     
+P90 TPOT (ms):                           30.98     
+P95 TPOT (ms):                           31.24     
+P99 TPOT (ms):                           31.32     
+Session clock: 38 min used, about $0.38 of GPU time at list price (the RunPod console shows the real bill).
+Running 'sweep_c16': concurrency 16, 96 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x76ee7c5462a0>, trust_remote_code=False, seed=0, num_prompts=96, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='sweep_c16.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-ea19ccc9-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     96        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  38.94     
+Request throughput (req/s):              2.47      
+Output token throughput (tok/s):         424.89    
+Peak output token throughput (tok/s):    512.00    
+Peak concurrent requests:                26.00     
+Total token throughput (tok/s):          1211.28   
+Mean TTFT (ms):                          122.61    
+Median TTFT (ms):                        106.02    
+P50 TTFT (ms):                           106.02    
+P90 TTFT (ms):                           157.28    
+P95 TTFT (ms):                           180.96    
+P99 TTFT (ms):                           234.05    
+Mean TPOT (ms):                          32.53     
+Median TPOT (ms):                        32.64     
+P50 TPOT (ms):                           32.64     
+P90 TPOT (ms):                           33.55     
+P95 TPOT (ms):                           33.68     
+P99 TPOT (ms):                           34.68     
+Session clock: 39 min used, about $0.39 of GPU time at list price (the RunPod console shows the real bill).
+Running 'sweep_c32': concurrency 32, 160 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7646cc27a2a0>, trust_remote_code=False, seed=0, num_prompts=160, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=32, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='sweep_c32.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-767c905a-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 32
+Successful requests:                     160       
+Failed requests:                         0         
+Maximum request concurrency:             32        
+Benchmark duration (s):                  36.44     
+Request throughput (req/s):              4.39      
+Output token throughput (tok/s):         747.80    
+Peak output token throughput (tok/s):    899.00    
+Peak concurrent requests:                49.00     
+Total token throughput (tok/s):          2044.12   
+Mean TTFT (ms):                          148.03    
+Median TTFT (ms):                        128.09    
+P50 TTFT (ms):                           128.09    
+P90 TTFT (ms):                           200.11    
+P95 TTFT (ms):                           214.51    
+P99 TTFT (ms):                           231.51    
+Mean TPOT (ms):                          37.56     
+Median TPOT (ms):                        37.44     
+P50 TPOT (ms):                           37.44     
+P90 TPOT (ms):                           40.10     
+P95 TPOT (ms):                           40.93     
+P99 TPOT (ms):                           41.62     
+Session clock: 40 min used, about $0.39 of GPU time at list price (the RunPod console shows the real bill).
+Running 'sweep_c64': concurrency 64, 256 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x70c45005e340>, trust_remote_code=False, seed=0, num_prompts=256, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=64, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='sweep_c64.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-c478c34c-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 64
+Successful requests:                     256       
+Failed requests:                         0         
+Maximum request concurrency:             64        
+Benchmark duration (s):                  38.58     
+Request throughput (req/s):              6.64      
+Output token throughput (tok/s):         1100.96   
+Peak output token throughput (tok/s):    1534.00   
+Peak concurrent requests:                89.00     
+Total token throughput (tok/s):          3060.28   
+Mean TTFT (ms):                          238.89    
+Median TTFT (ms):                        229.83    
+P50 TTFT (ms):                           229.83    
+P90 TTFT (ms):                           369.00    
+P95 TTFT (ms):                           373.27    
+P99 TTFT (ms):                           378.20    
+Mean TPOT (ms):                          49.53     
+Median TPOT (ms):                        47.12     
+P50 TPOT (ms):                           47.12     
+P90 TPOT (ms):                           58.76     
+P95 TPOT (ms):                           59.75     
+P99 TPOT (ms):                           70.01     
+== Summary ==
+run                          ok fail  req/s   tok/s  TTFT50  TTFT99  TPOT50  TPOT99  len50  len95   max  cap%
+sweep_c01                    24    0   0.20      34      64      84    29.1    29.4    210    256   256    42
+sweep_c02                    32    0   0.38      64      89     103    29.4    29.6    212    256   256    41
+sweep_c04                    48    0   0.79     131      92     155    29.7    30.5    192    256   256    40
+sweep_c08                    64    0   1.38     238      97     180    30.7    31.3    204    256   256    39
+sweep_c16                    96    0   2.47     425     106     234    32.6    34.7    203    256   256    38
+sweep_c32                   160    0   4.39     748     128     232    37.4    41.6    184    256   256    36
+sweep_c64                   256    0   6.64    1101     230     378    47.1    70.0    175    256   256    30
+
+keys in the result file: backend, burstiness, completed, date, duration, endpoint_type, errors, failed, generated_texts, input_lens, itls, label, latencies, max_concurrency, max_concurrent_requests, max_output_tokens_per_s, mean_e2el_ms, mean_itl_ms, mean_tpot_ms, mean_ttft_ms, median_e2el_ms, median_itl_ms, median_tpot_ms, median_ttft_ms, model_id, num_prompts, output_lens, output_throughput, p50_e2el_ms, p50_itl_ms, p50_tpot_ms, p50_ttft_ms, p90_e2el_ms, p90_itl_ms, p90_tpot_ms, p90_ttft_ms, p95_e2el_ms, p95_itl_ms, p95_tpot_ms, p95_ttft_ms, p99_e2el_ms, p99_itl_ms, p99_tpot_ms, p99_ttft_ms, queue_times, request_goodput, request_rate, request_throughput, rtfx, start_times, std_e2el_ms, std_itl_ms, std_tpot_ms, std_ttft_ms, tokenizer_id, total_input_tokens, total_output_tokens, total_token_throughput, ttfts
+concurrency-related values in the first file: {'max_concurrency': 1, 'max_concurrent_requests': 2}
+
+Session clock: 41 min used, about $0.40 of GPU time at list price (the RunPod console shows the real bill).
+== Metrics check (baseline, concurrency 16) ==
+Metric names that matter here:
+vllm:external_prefix_cache_hits_created
+vllm:external_prefix_cache_hits_total
+vllm:external_prefix_cache_queries_created
+vllm:external_prefix_cache_queries_total
+vllm:kv_cache_usage_perc
+vllm:num_requests_running
+vllm:num_requests_waiting
+vllm:num_requests_waiting_by_reason
+vllm:prefix_cache_hits_created
+vllm:prefix_cache_hits_total
+vllm:prefix_cache_queries_created
+vllm:prefix_cache_queries_total
+Session clock: 55 min used, about $0.55 of GPU time at list price (the RunPod console shows the real bill).
+Running 'metrics_load': concurrency 16, 64 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x7a6df22c23e0>, trust_remote_code=False, seed=0, num_prompts=64, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=16, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='metrics_load.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-7fb79e76-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 16
+Successful requests:                     64        
+Failed requests:                         0         
+Maximum request concurrency:             16        
+Benchmark duration (s):                  25.55     
+Request throughput (req/s):              2.50      
+Output token throughput (tok/s):         435.81    
+Peak output token throughput (tok/s):    510.00    
+Peak concurrent requests:                27.00     
+Total token throughput (tok/s):          1223.84   
+Mean TTFT (ms):                          126.26    
+Median TTFT (ms):                        109.20    
+P50 TTFT (ms):                           109.20    
+P90 TTFT (ms):                           169.99    
+P95 TTFT (ms):                           170.51    
+P99 TTFT (ms):                           173.86    
+Mean TPOT (ms):                          32.21     
+Median TPOT (ms):                        32.30     
+P50 TPOT (ms):                           32.30     
+P90 TPOT (ms):                           32.86     
+P95 TPOT (ms):                           32.94     
+P99 TPOT (ms):                           33.38     
+samples: 42 (saved to /workspace/logs/running_metrics_load.csv)
+running requests: min 0, mean 8.5, max 16
+waiting requests: min 0, mean 0.0, max 0
+
+Session clock: 56 min used, about $0.55 of GPU time at list price (the RunPod console shows the real bill).
+== Static K=3 server ==
+Session clock: 59 min used, about $0.59 of GPU time at list price (the RunPod console shows the real bill).
+Starting server 'k3'. Log: /workspace/logs/server_k3.log
+Server 'k3' is up after about 125 seconds.
+(APIServer pid=7664) INFO 11-24 00:15:35 [startup.py:96] non-default args: {'model_tag': 'Qwen/Qwen3-8B', 'model': 'Qwen/Qwen3-8B', 'max_model_len': 4096, 'gpu_memory_utilization': 0.9, 'max_num_seqs': 64, 'speculative_config': {'model': 'RedHatAI/Qwen3-8B-speculator.eagle3', 'num_speculative_tokens': 3, 'method': 'eagle3'}}
+(APIServer pid=7664) INFO 11-24 00:15:48 [speculative.py:1799] Overriding draft model max model len from 40960 to 4096
+(APIServer pid=7664) WARNING 11-24 00:15:48 [vllm.py:2360] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens.
+(EngineCore pid=8151) INFO 11-24 00:16:02 [core.py:139] Initializing a V1 LLM engine (v0.33.0) with config: model='Qwen/Qwen3-8B', speculative_config=SpeculativeConfig(method='eagle3', model='RedHatAI/Qwen3-8B-speculator.eagle3', num_spec_tokens=3), tokenizer='Qwen/Qwen3-8B', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, aux_output_config=AuxOutputConfig(enable_return_routed_experts=False, max_bytes=None), kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, custom_histogram_buckets=None, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=Qwen/Qwen3-8B, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['none'], 'ir_enable_torch_wrap': True, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::qwen4_exp_ple_short_conv', 'vllm::qwen4_exp_qsa_with_output', 'vllm::qwen4_exp_qsa_prepare_with_output', 'vllm::linear_attention', 'vllm::qwen_gdn_attention_core', 'vllm::qwen_gdn_attention_core_fused_norm_packed', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'cudagraph_decoder_replay': True, 'decoder_replay_cudagraph_capture_sizes': [], 'decoder_replay_trim_threshold': 768, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400, 416, 432, 448, 464, 480, 496, 512], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 512, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['triton', 'native']), enable_flashinfer_autotune=True, enable_rocm_segmented_attn_autotune=False, enable_cutedsl_warmup=True, enable_jit_warmup=True, monokernel=False, moe_backend='auto', sparse_indexer_topk_backend='auto', linear_backend='auto', linear_backend_per_quant=None)
+(EngineCore pid=8151) WARNING 11-24 00:16:05 [__init__.py:211] min_p and logit_bias parameters won't work with speculative decoding.
+(EngineCore pid=8151) WARNING 11-24 00:16:10 [vllm.py:2360] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens.
+(EngineCore pid=8151) INFO 11-24 00:16:14 [utils.py:381] Using LBNHC KV cache layout.
+(EngineCore pid=8151) INFO 11-24 00:16:55 [gpu_model_runner.py:6304] Profiling CUDA graph memory: PIECEWISE=49 (largest=512), FULL=33 (largest=256)
+(EngineCore pid=8151) INFO 11-24 00:16:57 [gpu_model_runner.py:6409] Estimated CUDA graph memory: 0.42 GiB total
+(EngineCore pid=8151) INFO 11-24 00:16:57 [gpu_worker.py:772] Available KV cache memory: 21.05 GiB
+(EngineCore pid=8151) INFO 11-24 00:16:57 [gpu_worker.py:787] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9000 is equivalent to --gpu-memory-utilization=0.8906 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9094. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=8151) INFO 11-24 00:16:57 [kv_cache_utils.py:1147] GPU KV cache size: 149,104 tokens, Maximum concurrency for 4,096 tokens per request: 36.40x
+(EngineCore pid=8151) INFO 11-24 00:17:17 [gpu_model_runner.py:6470] Rank 0: Torch profiler disabled for CUDA graph capture
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   0%|          | 0/49 [00:00<?, ?it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   2%|▏         | 1/49 [00:00<00:06,  7.93it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   4%|▍         | 2/49 [00:00<00:05,  8.52it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   6%|▌         | 3/49 [00:00<00:05,  8.77it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   8%|▊         | 4/49 [00:00<00:05,  8.90it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  10%|█         | 5/49 [00:00<00:05,  8.70it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  12%|█▏        | 6/49 [00:00<00:05,  8.59it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  14%|█▍        | 7/49 [00:00<00:04,  8.71it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  16%|█▋        | 8/49 [00:00<00:04,  8.81it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  20%|██        | 10/49 [00:01<00:04,  9.44it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  22%|██▏       | 11/49 [00:01<00:04,  9.32it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  24%|██▍       | 12/49 [00:01<00:03,  9.47it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  29%|██▊       | 14/49 [00:01<00:03,  9.78it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  33%|███▎      | 16/49 [00:01<00:03, 10.02it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  37%|███▋      | 18/49 [00:01<00:03, 10.25it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  41%|████      | 20/49 [00:02<00:02, 10.77it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  45%|████▍     | 22/49 [00:02<00:02, 11.12it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  49%|████▉     | 24/49 [00:02<00:02, 11.13it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  53%|█████▎    | 26/49 [00:02<00:01, 11.70it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  57%|█████▋    | 28/49 [00:02<00:01, 12.18it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  61%|██████    | 30/49 [00:02<00:01, 12.52it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  65%|██████▌   | 32/49 [00:03<00:01, 12.40it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  69%|██████▉   | 34/49 [00:03<00:01, 12.79it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  73%|███████▎  | 36/49 [00:03<00:00, 13.09it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  78%|███████▊  | 38/49 [00:03<00:00, 13.39it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  82%|████████▏ | 40/49 [00:03<00:00, 12.88it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  86%|████████▌ | 42/49 [00:03<00:00, 13.26it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  90%|████████▉ | 44/49 [00:03<00:00, 13.61it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  94%|█████████▍| 46/49 [00:04<00:00, 13.98it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  98%|█████████▊| 48/49 [00:04<00:00, 13.89it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 49/49 [00:04<00:00, 11.53it/s]
+Capturing CUDA graphs (decode, FULL):   0%|          | 0/33 [00:00<?, ?it/s]Capturing CUDA graphs (decode, FULL):   6%|▌         | 2/33 [00:00<00:02, 13.23it/s]Capturing CUDA graphs (decode, FULL):  12%|█▏        | 4/33 [00:00<00:02, 13.33it/s]Capturing CUDA graphs (decode, FULL):  18%|█▊        | 6/33 [00:00<00:02, 13.07it/s]Capturing CUDA graphs (decode, FULL):  24%|██▍       | 8/33 [00:00<00:01, 13.24it/s]Capturing CUDA graphs (decode, FULL):  30%|███       | 10/33 [00:00<00:01, 14.03it/s]Capturing CUDA graphs (decode, FULL):  36%|███▋      | 12/33 [00:00<00:01, 14.57it/s]Capturing CUDA graphs (decode, FULL):  42%|████▏     | 14/33 [00:00<00:01, 15.17it/s]Capturing CUDA graphs (decode, FULL):  48%|████▊     | 16/33 [00:01<00:01, 15.13it/s]Capturing CUDA graphs (decode, FULL):  55%|█████▍    | 18/33 [00:01<00:00, 15.86it/s]Capturing CUDA graphs (decode, FULL):  61%|██████    | 20/33 [00:01<00:00, 16.47it/s]Capturing CUDA graphs (decode, FULL):  67%|██████▋   | 22/33 [00:01<00:00, 16.97it/s]Capturing CUDA graphs (decode, FULL):  73%|███████▎  | 24/33 [00:01<00:00, 17.28it/s]Capturing CUDA graphs (decode, FULL):  79%|███████▉  | 26/33 [00:01<00:00, 17.00it/s]Capturing CUDA graphs (decode, FULL):  85%|████████▍ | 28/33 [00:01<00:00, 16.95it/s]Capturing CUDA graphs (decode, FULL):  94%|█████████▍| 31/33 [00:01<00:00, 18.18it/s]Capturing CUDA graphs (decode, FULL): 100%|██████████| 33/33 [00:02<00:00, 16.19it/s]
+(EngineCore pid=8151) INFO 11-24 00:17:24 [gpu_worker.py:1003] CUDA graph pool memory: 0.56 GiB (actual), 0.42 GiB (estimated), difference: 0.14 GiB (25.7%).
+(EngineCore pid=8151) INFO 11-24 00:17:24 [gpu_worker.py:1066] Free memory on device (44.08/44.42 GiB) on startup. Desired GPU memory utilization is (0.9, 39.98 GiB). Actual usage is 17.28 GiB for consumed memory (weights + non-torch), 1.65 GiB for peak activation, and 0.56 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=21836548096` (20.34 GiB) to fit into requested memory, or `--kv-cache-memory=26239322112` (24.44 GiB) to fully utilize gpu memory. Current kv cache memory in use is 21.05 GiB.
+(EngineCore pid=8151) INFO 11-24 00:17:25 [core.py:405] init engine (profile, create kv cache, warmup model) took 70.99 s (compilation: 30.69 s)
+snapshot saved: {'drafts': 0.0, 'draft_tokens': 0.0, 'accepted_tokens': 0.0}
+Session clock: 61 min used, about $0.61 of GPU time at list price (the RunPod console shows the real bill).
+Running 'static_c08': concurrency 8, 64 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x72d3b3e863e0>, trust_remote_code=False, seed=0, num_prompts=64, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=8, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='static_c08.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-853f12d8-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 8
+Successful requests:                     64        
+Failed requests:                         0         
+Maximum request concurrency:             8         
+Benchmark duration (s):                  29.27     
+Request throughput (req/s):              2.19      
+Output token throughput (tok/s):         381.70    
+Peak output token throughput (tok/s):    216.00    
+Peak concurrent requests:                13.00     
+Total token throughput (tok/s):          1069.79   
+Mean TTFT (ms):                          172.51    
+Median TTFT (ms):                        139.21    
+P50 TTFT (ms):                           139.21    
+P90 TTFT (ms):                           234.72    
+P95 TTFT (ms):                           262.74    
+P99 TTFT (ms):                           308.63    
+Mean TPOT (ms):                          18.81     
+Median TPOT (ms):                        18.64     
+P50 TPOT (ms):                           18.64     
+P90 TPOT (ms):                           21.77     
+P95 TPOT (ms):                           23.52     
+P99 TPOT (ms):                           26.08     
+snapshot saved: {'drafts': 5021.0, 'draft_tokens': 15063.0, 'accepted_tokens': 6405.0}
+== static K=3, concurrency 8 ==
+drafts: 5021   draft tokens: 15063   accepted tokens: 6405
+draft tokens per draft: 3.00
+acceptance rate (accepted / draft tokens): 0.43
+== Speed against the baseline at the same concurrency ==
+run                          ok fail  req/s   tok/s  TTFT50  TTFT99  TPOT50  TPOT99  len50  len95   max  cap%
+sweep_c08                    64    0   1.38     238      97     180    30.7    31.3    204    256   256    39
+static_c08                   64    0   2.19     382     139     309    18.6    26.1    210    256   256    42
+
+keys in the result file: backend, burstiness, completed, date, duration, endpoint_type, errors, failed, generated_texts, input_lens, itls, label, latencies, max_concurrency, max_concurrent_requests, max_output_tokens_per_s, mean_e2el_ms, mean_itl_ms, mean_tpot_ms, mean_ttft_ms, median_e2el_ms, median_itl_ms, median_tpot_ms, median_ttft_ms, model_id, num_prompts, output_lens, output_throughput, p50_e2el_ms, p50_itl_ms, p50_tpot_ms, p50_ttft_ms, p90_e2el_ms, p90_itl_ms, p90_tpot_ms, p90_ttft_ms, p95_e2el_ms, p95_itl_ms, p95_tpot_ms, p95_ttft_ms, p99_e2el_ms, p99_itl_ms, p99_tpot_ms, p99_ttft_ms, queue_times, request_goodput, request_rate, request_throughput, rtfx, start_times, std_e2el_ms, std_itl_ms, std_tpot_ms, std_ttft_ms, tokenizer_id, total_input_tokens, total_output_tokens, total_token_throughput, ttfts
+concurrency-related values in the first file: {'max_concurrency': 8, 'max_concurrent_requests': 12}
+== Same text as the baseline? (temperature 0) ==
+Same prompts? The per-request input lengths match, in order. That is a strong sign, not proof.
+prompts compared (both ok): 64 of 64
+identical text: 30 (47%)
+where texts first differ (character position): median 386, earliest 10
+Differences are recorded, not assumed to be bugs. Float rounding can change a token choice.
+
+Session clock: 62 min used, about $0.62 of GPU time at list price (the RunPod console shows the real bill).
+== Dynamic SD server, throwaway table [[1,16,3],[17,64,1]] ==
+Session clock: 110 min used, about $1.08 of GPU time at list price (the RunPod console shows the real bill).
+Starting server 'dynamic'. Log: /workspace/logs/server_dynamic.log
+Server 'dynamic' is up after about 105 seconds.
+(APIServer pid=8775) INFO 11-24 01:06:00 [startup.py:96] non-default args: {'model_tag': 'Qwen/Qwen3-8B', 'model': 'Qwen/Qwen3-8B', 'max_model_len': 4096, 'gpu_memory_utilization': 0.9, 'max_num_seqs': 64, 'speculative_config': {'model': 'RedHatAI/Qwen3-8B-speculator.eagle3', 'num_speculative_tokens': 3, 'method': 'eagle3', 'num_speculative_tokens_per_batch_size': [[1, 16, 3], [17, 64, 1]]}}
+(APIServer pid=8775) INFO 11-24 01:06:01 [speculative.py:1799] Overriding draft model max model len from 40960 to 4096
+(APIServer pid=8775) WARNING 11-24 01:06:01 [vllm.py:1079] Dynamic speculative decoding changes the target verification length at runtime. Overriding cudagraph_mode from FULL_AND_PIECEWISE to PIECEWISE for reliability. Use VLLM_USE_V2_MODEL_RUNNER=1 if you want to use full CUDA graphs.
+(APIServer pid=8775) WARNING 11-24 01:06:01 [vllm.py:2360] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens.
+(EngineCore pid=9028) INFO 11-24 01:06:13 [core.py:139] Initializing a V1 LLM engine (v0.33.0) with config: model='Qwen/Qwen3-8B', speculative_config=SpeculativeConfig(method='eagle3', model='RedHatAI/Qwen3-8B-speculator.eagle3', num_spec_tokens=3), tokenizer='Qwen/Qwen3-8B', skip_tokenizer_init=False, tokenizer_mode=auto, revision=main, tokenizer_revision=main, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=4096, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, aux_output_config=AuxOutputConfig(enable_return_routed_experts=False, max_bytes=None), kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, per_request_spec_decode_metrics='none', kv_cache_metrics=False, kv_cache_metrics_sample=0.01, custom_histogram_buckets=None, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=Qwen/Qwen3-8B, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['none'], 'ir_enable_torch_wrap': True, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::qwen4_exp_ple_short_conv', 'vllm::qwen4_exp_qsa_with_output', 'vllm::qwen4_exp_qsa_prepare_with_output', 'vllm::linear_attention', 'vllm::qwen_gdn_attention_core', 'vllm::qwen_gdn_attention_core_fused_norm_packed', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'cudagraph_decoder_replay': True, 'decoder_replay_cudagraph_capture_sizes': [], 'decoder_replay_trim_threshold': 768, 'compile_sizes': [], 'compile_ranges_endpoints': [2048], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.PIECEWISE: 1>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400, 416, 432, 448, 464, 480, 496, 512], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 512, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'], gelu_and_mul_sparse=['triton', 'native']), enable_flashinfer_autotune=True, enable_rocm_segmented_attn_autotune=False, enable_cutedsl_warmup=True, enable_jit_warmup=True, monokernel=False, moe_backend='auto', sparse_indexer_topk_backend='auto', linear_backend='auto', linear_backend_per_quant=None)
+(EngineCore pid=9028) WARNING 11-24 01:06:16 [__init__.py:211] min_p and logit_bias parameters won't work with speculative decoding.
+(EngineCore pid=9028) WARNING 11-24 01:06:20 [vllm.py:2360] max_num_scheduled_tokens is set to 2048 based on the speculative decoding settings. This may lead to suboptimal performance. Consider increasing max_num_batched_tokens to accommodate the additional draft token slots, or decrease num_speculative_tokens.
+(EngineCore pid=9028) INFO 11-24 01:06:24 [utils.py:381] Using LBNHC KV cache layout.
+(EngineCore pid=9028) INFO 11-24 01:07:03 [gpu_model_runner.py:6304] Profiling CUDA graph memory: PIECEWISE=51 (largest=512)
+(EngineCore pid=9028) INFO 11-24 01:07:05 [gpu_model_runner.py:6409] Estimated CUDA graph memory: 0.40 GiB total
+(EngineCore pid=9028) INFO 11-24 01:07:05 [gpu_worker.py:772] Available KV cache memory: 21.07 GiB
+(EngineCore pid=9028) INFO 11-24 01:07:05 [gpu_worker.py:787] CUDA graph memory profiling is enabled (default since v0.21.0). The current --gpu-memory-utilization=0.9000 is equivalent to --gpu-memory-utilization=0.8910 without CUDA graph memory profiling. To maintain the same effective KV cache size as before, increase --gpu-memory-utilization to 0.9090. To disable, set VLLM_MEMORY_PROFILER_ESTIMATE_CUDAGRAPHS=0.
+(EngineCore pid=9028) INFO 11-24 01:07:05 [kv_cache_utils.py:1147] GPU KV cache size: 149,232 tokens, Maximum concurrency for 4,096 tokens per request: 36.43x
+(EngineCore pid=9028) INFO 11-24 01:07:24 [gpu_model_runner.py:6470] Rank 0: Torch profiler disabled for CUDA graph capture
+Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   2%|▏         | 1/51 [00:00<00:06,  7.79it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   4%|▍         | 2/51 [00:00<00:06,  8.04it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   6%|▌         | 3/51 [00:00<00:06,  7.94it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):   8%|▊         | 4/51 [00:00<00:05,  8.11it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  10%|▉         | 5/51 [00:00<00:05,  8.22it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  12%|█▏        | 6/51 [00:00<00:05,  8.28it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  14%|█▎        | 7/51 [00:00<00:05,  8.14it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  16%|█▌        | 8/51 [00:00<00:05,  8.13it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  18%|█▊        | 9/51 [00:01<00:04,  8.49it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  20%|█▉        | 10/51 [00:01<00:04,  8.78it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  22%|██▏       | 11/51 [00:01<00:04,  8.95it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  24%|██▎       | 12/51 [00:01<00:04,  8.86it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  25%|██▌       | 13/51 [00:01<00:04,  8.86it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  27%|██▋       | 14/51 [00:01<00:04,  9.06it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  29%|██▉       | 15/51 [00:01<00:03,  9.19it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  31%|███▏      | 16/51 [00:01<00:03,  9.34it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  35%|███▌      | 18/51 [00:02<00:03,  9.77it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  39%|███▉      | 20/51 [00:02<00:03, 10.06it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  43%|████▎     | 22/51 [00:02<00:02, 10.26it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  47%|████▋     | 24/51 [00:02<00:02, 10.36it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  51%|█████     | 26/51 [00:02<00:02, 10.70it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  55%|█████▍    | 28/51 [00:02<00:02, 11.13it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  59%|█████▉    | 30/51 [00:03<00:01, 11.36it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  63%|██████▎   | 32/51 [00:03<00:01, 11.28it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  67%|██████▋   | 34/51 [00:03<00:01, 11.61it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  71%|███████   | 36/51 [00:03<00:01, 11.81it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  75%|███████▍  | 38/51 [00:03<00:01, 11.85it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  78%|███████▊  | 40/51 [00:03<00:00, 11.60it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  82%|████████▏ | 42/51 [00:04<00:00, 11.80it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  86%|████████▋ | 44/51 [00:04<00:00, 12.24it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  90%|█████████ | 46/51 [00:04<00:00, 12.46it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  94%|█████████▍| 48/51 [00:04<00:00, 13.04it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE):  98%|█████████▊| 50/51 [00:04<00:00, 13.45it/s]Capturing CUDA graphs (mixed prefill-decode, PIECEWISE): 100%|██████████| 51/51 [00:04<00:00, 10.69it/s]
+(EngineCore pid=9028) INFO 11-24 01:07:30 [gpu_worker.py:1003] CUDA graph pool memory: 0.4 GiB (actual), 0.4 GiB (estimated), difference: 0.0 GiB (1.0%).
+(EngineCore pid=9028) INFO 11-24 01:07:30 [gpu_worker.py:1066] Free memory on device (44.08/44.42 GiB) on startup. Desired GPU memory utilization is (0.9, 39.98 GiB). Actual usage is 17.28 GiB for consumed memory (weights + non-torch), 1.63 GiB for peak activation, and 0.4 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=22029486080` (20.52 GiB) to fit into requested memory, or `--kv-cache-memory=26432260096` (24.62 GiB) to fully utilize gpu memory. Current kv cache memory in use is 21.07 GiB.
+(EngineCore pid=9028) INFO 11-24 01:07:31 [core.py:405] init engine (profile, create kv cache, warmup model) took 67.07 s (compilation: 29.37 s)
+snapshot saved: {'drafts': 0.0, 'draft_tokens': 0.0, 'accepted_tokens': 0.0}
+Session clock: 112 min used, about $1.10 of GPU time at list price (the RunPod console shows the real bill).
+Running 'dyn_c32': concurrency 32, 160 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x770fe8f8e340>, trust_remote_code=False, seed=0, num_prompts=160, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=32, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='dyn_c32.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-cbe6d62a-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 32
+Successful requests:                     160       
+Failed requests:                         0         
+Maximum request concurrency:             32        
+Benchmark duration (s):                  34.09     
+Request throughput (req/s):              4.69      
+Output token throughput (tok/s):         800.03    
+Peak output token throughput (tok/s):    643.00    
+Peak concurrent requests:                42.00     
+Total token throughput (tok/s):          2185.71   
+Mean TTFT (ms):                          349.74    
+Median TTFT (ms):                        236.30    
+P50 TTFT (ms):                           236.30    
+P90 TTFT (ms):                           805.78    
+P95 TTFT (ms):                           1331.29   
+P99 TTFT (ms):                           1337.20   
+Mean TPOT (ms):                          35.13     
+Median TPOT (ms):                        34.39     
+P50 TPOT (ms):                           34.39     
+P90 TPOT (ms):                           41.16     
+P95 TPOT (ms):                           43.85     
+P99 TPOT (ms):                           68.09     
+samples: 49 (saved to /workspace/logs/running_dyn_c32.csv)
+running requests: min 0, mean 18.9, max 32
+waiting requests: min 0, mean 0.3, max 14
+snapshot saved: {'drafts': 16362.0, 'draft_tokens': 17194.0, 'accepted_tokens': 11081.0}
+== concurrency 32 (the prediction run) ==
+drafts: 16362   draft tokens: 17194   accepted tokens: 11081
+draft tokens per draft: 1.05
+acceptance rate (accepted / draft tokens): 0.64
+F-003 prediction: CONFIRMED (below 1.5).
+Session clock: 112 min used, about $1.11 of GPU time at list price (the RunPod console shows the real bill).
+Running 'dyn_c04': concurrency 4, 48 prompts ...
+Namespace(subparser='bench', bench_type='serve', dispatch_function=<function BenchmarkServingSubcommand.cmd at 0x791c5829a340>, trust_remote_code=False, seed=0, num_prompts=48, dataset_name='spec_bench', no_stream=False, dataset_path='/workspace/data/question.jsonl', no_oversample=True, skip_chat_template=True, enable_multimodal_chat=False, disable_shuffle=False, custom_output_len=256, custom_ensure_client_side_data=False, spec_bench_output_len=256, spec_bench_category=None, sharegpt_output_len=None, timed_trace_chunk_hash_size=16, timed_trace_sec_multiplier=1, timed_trace_label_timestamp='timestamp', timed_trace_label_input_length='input_length', timed_trace_label_output_length='output_length', timed_trace_label_hash_ids='hash_ids', blazedit_min_distance=0.0, blazedit_max_distance=1.0, asr_max_audio_len_sec=inf, asr_min_audio_len_sec=0.0, random_input_len=1024, random_output_len=128, random_range_ratio='0.0', random_prefix_len=0, random_batch_size=1, no_reranker=False, random_mm_base_items_per_request=1, random_mm_num_mm_items_range_ratio=0.0, random_mm_limit_mm_per_prompt={'image': 255, 'video': 1}, random_mm_bucket_config={(256, 256, 1): 0.5, (720, 1280, 1): 0.5, (720, 1280, 16): 0.0}, hf_subset=None, hf_split=None, hf_name=None, hf_output_len=None, bfcl_categories=None, prefix_repetition_prefix_len=256, prefix_repetition_suffix_len=256, prefix_repetition_num_prefixes=10, prefix_repetition_output_len=128, speed_bench_dataset_subset='qualitative', speed_bench_output_len=4096, speed_bench_category=None, label=None, backend='openai-chat', base_url=None, host='127.0.0.1', port=8000, endpoint='/v1/chat/completions', header=None, max_concurrency=4, model='Qwen/Qwen3-8B', input_len=None, output_len=256, tokenizer=None, tokenizer_mode='auto', use_beam_search=False, logprobs=None, request_rate=inf, burstiness=1.0, probe_request_rate=0.0, disable_tqdm=True, num_warmups=8, profile=False, save_result=True, save_detailed=True, append_result=False, metadata=None, result_dir='/workspace/results/validate', result_filename='dyn_c04.json', ignore_eos=False, self_timed=None, percentile_metrics='ttft,tpot,itl,e2el', metric_percentiles='50,90,95,99', goodput=None, request_id_prefix='bench-39cb9986-', top_p=None, top_k=None, min_p=None, temperature=0.0, frequency_penalty=None, presence_penalty=None, repetition_penalty=None, served_model_name=None, lora_modules=None, lora_assignment='random', ramp_up_strategy=None, ramp_up_start_rps=None, ramp_up_end_rps=None, ready_check_timeout_sec=0, chat_template_kwargs=None, extra_body={'chat_template_kwargs': {'enable_thinking': False}}, skip_tokenizer_init=False, insecure=False, plot_timeline=False, timeline_itl_thresholds='25,50', plot_dataset_stats=False, log_config_file=None, logging_config=LoggingConfig(log_level='INFO', formatter='text', configure_logging=True, pylogging_config_file=None))
+Maximum request concurrency: 4
+Successful requests:                     48        
+Failed requests:                         0         
+Maximum request concurrency:             4         
+Benchmark duration (s):                  34.17     
+Request throughput (req/s):              1.40      
+Output token throughput (tok/s):         236.52    
+Peak output token throughput (tok/s):    112.00    
+Peak concurrent requests:                7.00      
+Total token throughput (tok/s):          635.89    
+Mean TTFT (ms):                          108.77    
+Median TTFT (ms):                        110.04    
+P50 TTFT (ms):                           110.04    
+P90 TTFT (ms):                           113.46    
+P95 TTFT (ms):                           114.69    
+P99 TTFT (ms):                           114.88    
+Mean TPOT (ms):                          16.24     
+Median TPOT (ms):                        16.37     
+P50 TPOT (ms):                           16.37     
+P90 TPOT (ms):                           18.01     
+P95 TPOT (ms):                           18.37     
+P99 TPOT (ms):                           21.17     
+samples: 48 (saved to /workspace/logs/running_dyn_c04.csv)
+running requests: min 0, mean 2.8, max 4
+waiting requests: min 0, mean 0.0, max 0
+snapshot saved: {'drafts': 20031.0, 'draft_tokens': 28201.0, 'accepted_tokens': 15752.0}
+== concurrency 4 (control, F-002 gave 3.00) ==
+drafts: 3669   draft tokens: 11007   accepted tokens: 4671
+draft tokens per draft: 3.00
+acceptance rate (accepted / draft tokens): 0.42
+run                          ok fail  req/s   tok/s  TTFT50  TTFT99  TPOT50  TPOT99  len50  len95   max  cap%
+dyn_c32                     160    0   4.69     800     236    1337    34.4    68.1    181    256   256    36
+dyn_c04                      48    0   1.40     237     110     115    16.4    21.2    204    256   256    40
+
+keys in the result file: backend, burstiness, completed, date, duration, endpoint_type, errors, failed, generated_texts, input_lens, itls, label, latencies, max_concurrency, max_concurrent_requests, max_output_tokens_per_s, mean_e2el_ms, mean_itl_ms, mean_tpot_ms, mean_ttft_ms, median_e2el_ms, median_itl_ms, median_tpot_ms, median_ttft_ms, model_id, num_prompts, output_lens, output_throughput, p50_e2el_ms, p50_itl_ms, p50_tpot_ms, p50_ttft_ms, p90_e2el_ms, p90_itl_ms, p90_tpot_ms, p90_ttft_ms, p95_e2el_ms, p95_itl_ms, p95_tpot_ms, p95_ttft_ms, p99_e2el_ms, p99_itl_ms, p99_tpot_ms, p99_ttft_ms, queue_times, request_goodput, request_rate, request_throughput, rtfx, spec_decode_acceptance_length, spec_decode_acceptance_rate, spec_decode_accepted_tokens, spec_decode_draft_tokens, spec_decode_num_drafts, spec_decode_per_position_acceptance_rates, start_times, std_e2el_ms, std_itl_ms, std_tpot_ms, std_ttft_ms, tokenizer_id, total_input_tokens, total_output_tokens, total_token_throughput, ttfts
+concurrency-related values in the first file: {'max_concurrency': 32, 'max_concurrent_requests': 42}
+
+Session clock: 113 min used, about $1.12 of GPU time at list price (the RunPod console shows the real bill).
+Server stopped.
+
+Session clock: 117 min used, about $1.16 of GPU time at list price (the RunPod console shows the real bill).
+Server stopped.
+
+Session clock: 117 min used, about $1.16 of GPU time at list price (the RunPod console shows the real bill).

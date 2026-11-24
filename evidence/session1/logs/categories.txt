@@ -1,0 +1,13 @@
+10 coding
+10 extraction
+10 humanities
+10 math
+80 math_reasoning
+80 qa
+80 rag
+10 reasoning
+10 roleplay
+10 stem
+80 summarization
+80 translation
+10 writing

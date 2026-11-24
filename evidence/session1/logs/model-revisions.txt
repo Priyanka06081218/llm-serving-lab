@@ -1,0 +1,2 @@
+Qwen/Qwen3-8B -> /workspace/.cache/huggingface/hub/models--Qwen--Qwen3-8B/snapshots/b968826d9c46dd6066d109eabc6255188de91218
+RedHatAI/Qwen3-8B-speculator.eagle3 -> /workspace/.cache/huggingface/hub/models--RedHatAI--Qwen3-8B-speculator.eagle3/snapshots/08610ffa01dd9f16731fe8f627b85905b6aa51c4
