@@ -44,4 +44,4 @@ Every line should say OK. The original archive downloaded from the pod was `sess
 - The MT-bench categories (coding, extraction, humanities, math, reasoning, roleplay, stem, writing) have only 10 prompts each. Do not make per-category claims from them.
 - The text-agreement check (outputs identical to the baseline) is not proof about speculation. Two baseline runs at different batch sizes matched each other on only 50% of prompts.
 - transformers 5.20.2 was installed on the pod. The earlier token counts in FINDINGS (F-004) used 4.57.1.
-- `scripts/setup.sh` did not install the benchmark extra on this run. It was installed by hand (`vllm[bench]==0.33.0`). The script needs fixing.
+- `scripts/setup.sh` did not install the benchmark extra on this run. It was installed by hand (`vllm[bench]==0.33.0`) after setup had finished. So `logs/pip-freeze.txt` does not list the 17 packages the extra added (among them pandas, datasets and scipy). Their versions are in `logs/bench_extra_dryrun.txt`, which is a dry run and not a record of what was installed. The script has since been changed to install the extra itself, so later freezes will include them.

@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # setup.sh - get a fresh pod ready for the experiments.
 # Run it once per pod, from the repo folder:  bash scripts/setup.sh
-# It installs vLLM, downloads the pinned dataset and the two models,
-# and writes down what the machine looks like.
+# It installs vLLM with its benchmark extra, downloads the pinned dataset
+# and the two models, and writes down what the machine looks like.
 
 set -eo pipefail
 
@@ -27,16 +27,24 @@ if [ "$free_gb" -lt "$MIN_FREE_GB" ]; then
   exit 1
 fi
 
-echo "== 2. vLLM ${VLLM_VERSION} =="
+echo "== 2. vLLM ${VLLM_VERSION} with the benchmark extra =="
 pip install --quiet uv
 if [ ! -d "$VENV" ]; then
   uv venv --python 3.12 "$VENV"
 fi
 source "$VENV/bin/activate"
-if uv pip show vllm 2>/dev/null | grep -q "^Version: ${VLLM_VERSION}$"; then
-  echo "vLLM ${VLLM_VERSION} is already installed."
+# The benchmark extra brings pandas, datasets and scipy. Without it the
+# benchmark only fails later, when it first reads the dataset.
+BENCH_CHECK='import pandas, datasets, scipy'
+if uv pip show vllm 2>/dev/null | grep -q "^Version: ${VLLM_VERSION}$" \
+   && python -c "$BENCH_CHECK" 2>/dev/null; then
+  echo "vLLM ${VLLM_VERSION} and the benchmark extra are already installed."
 else
-  uv pip install "vllm==${VLLM_VERSION}" --torch-backend=auto
+  uv pip install "vllm[bench]==${VLLM_VERSION}" --torch-backend=auto
+fi
+if ! python -c "$BENCH_CHECK" 2>/dev/null; then
+  echo "The benchmark extra is still missing after the install (pandas, datasets or scipy). Stopping."
+  exit 1
 fi
 vllm download-kernels
 
