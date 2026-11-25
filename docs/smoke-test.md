@@ -43,6 +43,8 @@ I sent a quick test request to the servers to check they were answering. It used
 
 I didn't save the exact `vllm bench serve` command or the test request, and the pod's terminal history is gone because the pod's disk is erased when it stops. Next session I'll re-run the concurrency 4 benchmark and write the exact command here. From now on, every command I run goes into a script or a log file.
 
+Update, 24 Nov 2026: the first validation session ran a concurrency 4 control on the Spec-Bench prompts, not on the random dataset used here, so it is not the same run. Every command from that session is in `evidence/session1/logs/commands.log`.
+
 ## Things that went wrong
 
 - **The disk filled up.** The pod had a 50 GB disk and ran out of space while the model was downloading ("No space left on device"). The uv cache was using about 18 GiB, and `uv cache clean` freed 17.9 GiB. For the real runs I plan to use about 100 GB or a persistent volume. Because the disk is erased when the pod stops, a new pod needs a full reinstall, which takes about 10 minutes.

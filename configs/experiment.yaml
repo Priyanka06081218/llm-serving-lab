@@ -1,9 +1,17 @@
-# What to run. The harness reads this file and runs nothing that is not written here.
+# What the real experiment will run. The harness that reads this file is not written yet.
+# Until it is, the session scripts (scripts/lib.sh) keep their own copies of these values.
 
 model: Qwen/Qwen3-8B
 speculator: RedHatAI/Qwen3-8B-speculator.eagle3
 vllm_version: 0.33.0
 max_model_len: 4096
+
+# Server settings every arm shares. Session 1 used the first two (see scripts/lib.sh).
+server:
+  max_num_seqs: 64
+  gpu_memory_utilization: 0.90
+  prefix_caching: null           # not decided: on or off for every arm (F-005)
+  max_num_batched_tokens: null   # not decided: one explicit value for every arm (F-005)
 
 # The four configurations. "off" means no speculative config at all.
 arms:
