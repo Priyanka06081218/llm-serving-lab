@@ -1,0 +1,4 @@
+# Only for the CPU checks (tests and lint). The GPU pod installs its own packages in scripts/setup.sh.
+pytest>=8
+ruff>=0.5
+numpy>=1.26

@@ -1,0 +1,8 @@
+# macOS folder files
+.DS_Store
+# Archive copies of a session's evidence. The unpacked files and SHA256SUMS are what gets committed.
+evidence/*/*.tgz
+# Python and tool caches
+__pycache__/
+.pytest_cache/
+.ruff_cache/

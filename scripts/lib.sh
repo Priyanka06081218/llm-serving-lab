@@ -1,12 +1,16 @@
 # lib.sh - small helpers shared by the session scripts. Source it, do not run it.
+# shellcheck shell=bash
 
 WORK="${WORK:-/workspace}"
 LOG_DIR="$WORK/logs"
 RESULTS="$WORK/results/validate"
 DATA="$WORK/data/question.jsonl"
-PORT=8000
-MODEL="Qwen/Qwen3-8B"
+# Port and model are exported so the Python tools (metrics_tool.py,
+# chat_check.py) use the same values. Override with LAB_PORT / LAB_MODEL.
+PORT="${LAB_PORT:-8000}"
+MODEL="${LAB_MODEL:-Qwen/Qwen3-8B}"
 SPECULATOR="RedHatAI/Qwen3-8B-speculator.eagle3"
+export LAB_PORT="$PORT" LAB_MODEL="$MODEL"
 PID_FILE="$LOG_DIR/server.pid"
 NAME_FILE="$LOG_DIR/server.name"
 CLOCK_FILE="$LOG_DIR/session_start"
@@ -17,12 +21,21 @@ MAX_HOURS="${MAX_HOURS:-3}"
 
 # The two speculative-decoding settings used in this session.
 # static K=3, and Dynamic SD with the throwaway table from the smoke test.
+# validate_gpu.sh uses them after sourcing this file.
+# shellcheck disable=SC2034
 SPEC_K3="{\"model\":\"$SPECULATOR\",\"num_speculative_tokens\":3,\"method\":\"eagle3\"}"
+# shellcheck disable=SC2034
 SPEC_DYNAMIC="{\"model\":\"$SPECULATOR\",\"num_speculative_tokens\":3,\"method\":\"eagle3\",\"num_speculative_tokens_per_batch_size\":[[1,16,3],[17,64,1]]}"
 
 LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 mkdir -p "$LOG_DIR" "$RESULTS"
+
+# log_cmd CMD...: add one line to commands.log. printf %q keeps the quoting,
+# so a logged line can be copied and run again exactly as it was.
+log_cmd() {
+  { printf '[%s] ' "$(date -u +%FT%TZ)"; printf '%q ' "$@"; echo; } >> "$LOG_DIR/commands.log"
+}
 
 # ---------------------------------------------------------------- session clock
 # The clock starts the first time a step runs. If setup.log exists we start it
@@ -63,7 +76,7 @@ start_server() {
   local cmd=(env VLLM_USE_V2_MODEL_RUNNER=0 vllm serve "$MODEL"
     --max-model-len 4096 --gpu-memory-utilization 0.90 --max-num-seqs 64
     --port "$PORT" "$@")
-  echo "[$(date -u +%FT%TZ)] ${cmd[*]}" >> "$LOG_DIR/commands.log"
+  log_cmd "${cmd[@]}"
   echo "Starting server '$name'. Log: $log"
   nohup "${cmd[@]}" > "$log" 2>&1 < /dev/null &
   local pid=$!
@@ -131,6 +144,8 @@ run_bench() {
   local name="$1" conc="$2" n="$3"; shift 3
   session_guard || return 1
   local logf="$LOG_DIR/bench_${name}.log"
+  # The commas below are inside single arguments (ttft,tpot,itl,e2el), on purpose.
+  # shellcheck disable=SC2054
   local cmd=(vllm bench serve
     --backend openai-chat --endpoint /v1/chat/completions
     --model "$MODEL" --port "$PORT"
@@ -145,7 +160,7 @@ run_bench() {
     --save-result --save-detailed
     --result-dir "$RESULTS" --result-filename "${name}.json"
     --disable-tqdm "$@")
-  echo "[$(date -u +%FT%TZ)] ${cmd[*]}" >> "$LOG_DIR/commands.log"
+  log_cmd "${cmd[@]}"
   echo "Running '$name': concurrency $conc, $n prompts ..."
   # < /dev/null stops the benchmark from reading (and eating) the input of a surrounding loop.
   if ! "${cmd[@]}" > "$logf" 2>&1 < /dev/null; then

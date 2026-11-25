@@ -1,0 +1,27 @@
+# CPU-only checks on every push and pull request. Nothing here needs a GPU or a model download.
+name: checks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test tools
+        run: pip install -r requirements-dev.txt
+      - name: Shell syntax
+        run: for f in scripts/*.sh; do bash -n "$f"; done
+      - name: Shellcheck
+        run: shellcheck -S warning -e SC1091 scripts/*.sh
+      - name: Python syntax and real errors (ruff E9 and F rules)
+        run: ruff check --select E9,F scripts tests
+      - name: Tests
+        run: python -m pytest -q tests
+      - name: Evidence checksums
+        run: cd evidence/session1 && sha256sum -c --quiet SHA256SUMS

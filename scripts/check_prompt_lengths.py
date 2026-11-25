@@ -14,7 +14,7 @@ MODEL = "Qwen/Qwen3-8B"
 MAX_MODEL_LEN = 4096
 OUTPUT_LEN = 256
 TOKENIZER_REVISION = "b968826d9c46dd6066d109eabc6255188de91218"
-# Must match dataset.source_sha256 in configs/experiment.yaml
+# Must match DATASET_SHA256 in scripts/setup.sh
 EXPECTED_SHA256 = "4b6d33e79484f9841c487ee87d1cf6aa8c6066f61d5d482ff09e5a007fafdf04"
 
 path = sys.argv[1]

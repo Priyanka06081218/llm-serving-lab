@@ -1,13 +1,17 @@
 # Sends one raw prompt to the running server through the chat endpoint, thinking off,
 # and checks that the server applied the chat template exactly once.
 import json
+import os
 import sys
 import urllib.request
 
 from transformers import AutoTokenizer
 
-MODEL = "Qwen/Qwen3-8B"
-URL = "http://localhost:8000/v1/chat/completions"
+# Same values as scripts/lib.sh, which exports them.
+MODEL = os.environ.get("LAB_MODEL", "Qwen/Qwen3-8B")
+URL = f"http://localhost:{os.environ.get('LAB_PORT', '8000')}/v1/chat/completions"
+# The tokenizer revision used for F-004 and seen in session 1.
+TOKENIZER_REVISION = "b968826d9c46dd6066d109eabc6255188de91218"
 PROMPT = "What is the capital of France? Answer in one sentence."
 
 body = {
@@ -22,14 +26,14 @@ request = urllib.request.Request(
     data=json.dumps(body).encode(),
     headers={"Content-Type": "application/json"},
 )
-with urllib.request.urlopen(request) as response:
+with urllib.request.urlopen(request, timeout=60) as response:
     reply = json.load(response)
 
 answer = reply["choices"][0]["message"]["content"]
 server_prompt_tokens = reply["usage"]["prompt_tokens"]
 
 # What the token count would be if the template were applied once, or twice.
-tok = AutoTokenizer.from_pretrained(MODEL)
+tok = AutoTokenizer.from_pretrained(MODEL, revision=TOKENIZER_REVISION)
 once = tok.apply_chat_template(
     [{"role": "user", "content": PROMPT}],
     add_generation_prompt=True,
