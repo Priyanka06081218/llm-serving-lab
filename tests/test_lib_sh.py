@@ -40,3 +40,22 @@ def test_port_and_model_are_exported_with_defaults(tmp_path):
 def test_port_can_be_overridden(tmp_path):
     out = bash(f'LAB_PORT=9001 source "{LIB}"; echo "$PORT"', tmp_path).stdout.strip()
     assert out == "9001"
+
+
+def test_prefix_caching_is_off_by_default(tmp_path):
+    out = bash(f'source "{LIB}"; cache_flag', tmp_path).stdout.strip()
+    assert out == "--disable-prefix-caching"
+
+
+def test_prefix_caching_can_be_turned_on_to_repeat_session_1(tmp_path):
+    out = bash(f'LAB_PREFIX_CACHING=on; source "{LIB}"; cache_flag', tmp_path).stdout.strip()
+    assert out == "--enable-prefix-caching"
+
+
+def test_prefix_caching_setting_must_be_on_or_off(tmp_path):
+    result = subprocess.run(["bash", "-c", f'LAB_PREFIX_CACHING=true; source "{LIB}"; cache_flag'],
+                            capture_output=True, text=True,
+                            env={"WORK": str(tmp_path), "PATH": "/usr/bin:/bin"})
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert "must be 'on' or 'off'" in result.stderr

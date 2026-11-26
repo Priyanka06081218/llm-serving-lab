@@ -61,6 +61,18 @@ session_guard() {
 }
 
 # ---------------------------------------------------------------- server
+# cache_flag: the prefix-caching flag every server gets. Caching is OFF for
+# every arm, so a fresh server and a warm one behave the same and the arms
+# differ only in speculation. Session 1 ran with the vLLM default (caching on);
+# LAB_PREFIX_CACHING=on gives that behaviour back.
+cache_flag() {
+  case "${LAB_PREFIX_CACHING:-off}" in
+    off) echo "--disable-prefix-caching" ;;
+    on) echo "--enable-prefix-caching" ;;
+    *) echo "LAB_PREFIX_CACHING must be 'on' or 'off', not '${LAB_PREFIX_CACHING}'." >&2; return 1 ;;
+  esac
+}
+
 # start_server NAME [extra vllm arguments]
 # Starts vLLM in the background, saves its output to a log file, and waits
 # until the server answers. Every arm gets the same base settings, so the
@@ -68,6 +80,8 @@ session_guard() {
 start_server() {
   local name="$1"; shift
   session_guard || return 1
+  local cache
+  cache=$(cache_flag) || return 1
   if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
     echo "A server is already running (pid $(cat "$PID_FILE")). Run the stop step first."
     return 1
@@ -75,7 +89,7 @@ start_server() {
   local log="$LOG_DIR/server_${name}.log"
   local cmd=(env VLLM_USE_V2_MODEL_RUNNER=0 vllm serve "$MODEL"
     --max-model-len 4096 --gpu-memory-utilization 0.90 --max-num-seqs 64
-    --port "$PORT" "$@")
+    --port "$PORT" "$cache" "$@")
   log_cmd "${cmd[@]}"
   echo "Starting server '$name'. Log: $log"
   nohup "${cmd[@]}" > "$log" 2>&1 < /dev/null &
