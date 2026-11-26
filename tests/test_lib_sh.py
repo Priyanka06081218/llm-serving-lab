@@ -59,3 +59,38 @@ def test_prefix_caching_setting_must_be_on_or_off(tmp_path):
     assert result.returncode == 1
     assert result.stdout == ""
     assert "must be 'on' or 'off'" in result.stderr
+
+
+# ---------------------------------------------------------------- the real server command
+def logged_server_commands(tmp_path):
+    """Run start_server for three arms with a stand-in `vllm`, and return the commands it logged."""
+    fake = tmp_path / "fakebin"
+    fake.mkdir()
+    for name, body in {"vllm": "exec sleep 30", "curl": "exit 0", "nvidia-smi": "echo 0"}.items():
+        script = fake / name
+        script.write_text("#!/bin/bash\n" + body + "\n")
+        script.chmod(0o755)
+    steps = (
+        'start_server off; stop_server; '
+        'start_server k3 --speculative-config "$SPEC_K3"; stop_server; '
+        'start_server dynamic --speculative-config "$SPEC_DYNAMIC"; stop_server'
+    )
+    subprocess.run(["bash", "-c", f'source "{LIB}"; {steps}'], check=True, capture_output=True, text=True,
+                   env={"WORK": str(tmp_path), "PATH": f"{fake}:/usr/bin:/bin"})
+    lines = (tmp_path / "logs" / "commands.log").read_text().splitlines()
+    return [line.split("] ", 1)[1] for line in lines]
+
+
+def test_every_arm_gets_the_same_controls(tmp_path):
+    commands = logged_server_commands(tmp_path)
+    assert len(commands) == 3
+    for command in commands:
+        assert "--max-num-batched-tokens 2048" in command
+        assert "--disable-prefix-caching" in command
+
+
+def test_arms_differ_only_in_the_speculative_config(tmp_path):
+    off, k3, dynamic = logged_server_commands(tmp_path)
+    assert "--speculative-config" not in off
+    assert off.rstrip() == k3.split("--speculative-config")[0].rstrip()
+    assert off.rstrip() == dynamic.split("--speculative-config")[0].rstrip()

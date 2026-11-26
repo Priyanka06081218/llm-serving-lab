@@ -11,7 +11,7 @@ server:
   max_num_seqs: 64
   gpu_memory_utilization: 0.90
   prefix_caching: false          # decided 25 Nov 2026: off for every arm. Session 1 ran with it on (F-005)
-  max_num_batched_tokens: null   # not decided: one explicit value for every arm (F-005)
+  max_num_batched_tokens: 2048   # decided 26 Nov 2026: set explicitly for every arm. Same as the 0.33.0 default on this GPU, by source reading
 
 # The four configurations. "off" means no speculative config at all.
 arms:

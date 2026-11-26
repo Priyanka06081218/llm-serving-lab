@@ -20,7 +20,7 @@ source "$HERE/lib.sh"
 exec > >(tee -a "$LOG_DIR/validate.log") 2>&1
 
 step="${1:-}"
-STARTUP_FACTS="KV cache|prefix caching|cudagraph|cuda graph|max_num_scheduled|maximum concurrency|chunked|speculat"
+STARTUP_FACTS="non-default args|max_num_batched|KV cache|prefix caching|cudagraph|cuda graph|max_num_scheduled|maximum concurrency|chunked|speculat"
 METRICS="python $HERE/metrics_tool.py"
 SUMMARY="python $HERE/summarize_bench.py"
 

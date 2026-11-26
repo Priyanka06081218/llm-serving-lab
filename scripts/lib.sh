@@ -89,6 +89,7 @@ start_server() {
   local log="$LOG_DIR/server_${name}.log"
   local cmd=(env VLLM_USE_V2_MODEL_RUNNER=0 vllm serve "$MODEL"
     --max-model-len 4096 --gpu-memory-utilization 0.90 --max-num-seqs 64
+    --max-num-batched-tokens 2048
     --port "$PORT" "$cache" "$@")
   log_cmd "${cmd[@]}"
   echo "Starting server '$name'. Log: $log"
