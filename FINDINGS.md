@@ -201,3 +201,38 @@ At concurrency 4 the dynamic server is clearly faster in this run. At concurrenc
 - Whether to add a baseline arm in `PIECEWISE` mode, so the CUDA graph mode is separated from Dynamic SD itself.
 - How many repeats each configuration gets, so I know the noise before I read any difference.
 - Which categories go into the profile and the held-out workload. Translation and extraction make very little output, so they say little about speculation.
+
+## Upstream State — November 25, 2026
+
+This entry records what changed in vLLM after my experiments were set up. It does not change F-001 to F-005, or any setting or result in this repo.
+
+**My experiments.** The smoke test and session 1 ran vLLM 0.33.0 with Model Runner V1. `scripts/lib.sh` starts every server with `VLLM_USE_V2_MODEL_RUNNER=0`. The experiments stay on 0.33.0.
+
+**vLLM 0.34.0 removes Model Runner V1.** Its release page (16 Nov) says "Model Runner V1 is gone", and that `VLLM_USE_V2_MODEL_RUNNER=0` now fails at startup. So my scripts would not start a server on 0.34.0, and any upstream work has to target Model Runner V2 on current vLLM. The K lookup for Dynamic SD is in the scheduler, not in the model runner, so the code I read for F-003 is not tied to V1 or V2.
+
+**PR #66647 changes what K is looked up by.** In 0.33.0 the scheduler looks up K by the number of requests scheduled in the step, `len(num_scheduled_tokens)` (F-003). The PR changes that one line to the number of running requests, `len(self.running)`. It adds one test, `test_scheduler_keys_dsd_tier_on_running_batch_during_ramp`. That test uses pipeline parallelism with 2 stages, so 5 requests are running but only 1 is scheduled in the step. With the table `[(1,4,3),(5,8,0)]` the old rule gives K=3 and the new rule gives K=0.
+
+I read the code at the PR's merge preview, commit 6b11bfd (25 Nov 2026). The PR looked open: its branch was updated on 13 Nov, and GitHub still builds a merge preview for it. I could not read its review comments, so I don't know what the maintainers think of it.
+
+**CPU test run.** I ran `tests/v1/spec_decode/test_dynamic_sd.py` at that commit on a Linux machine with no GPU.
+- With the PR's rule: 18 passed, 1 failed. The failing test, `test_dynamic_sd_with_data_parallel[moe]`, needs the `ibm-research/PowerMoE-3b` config from Hugging Face, which that machine could not reach.
+- With the old rule put back: the new test failed with `assert 3 == 0`, and the other 17 still passed. So the new test does catch the old behaviour.
+
+This was not a clean vLLM install, so it is not a clean upstream test run:
+- vLLM ran from its source folder, not built for CPU. I added a fake installed version ending in `+cpu`, so that vLLM would choose its CPU path.
+- The config.json for `facebook/opt-125m`, which the tests read, was written by hand, because Hugging Face was blocked.
+- PyTorch 2.14.0 came from PyPI (a CUDA build, used without a GPU). triton-cpu 3.8.0 was added, as vLLM's `requirements/cpu.txt` lists it.
+
+I did not run the tests on my Mac.
+
+**What this means for F-003.** F-003 and its 1.05 result describe the 0.33.0 rule: K by the scheduled count. If #66647 is merged, newer vLLM picks K by the running count, so the same table can give a different K.
+
+On one GPU without pipeline parallelism, I think the two counts are usually the same, because running requests are scheduled first in each step. They split when the step's token budget (2048 in my static and dynamic servers, F-002) runs out before every running request gets a turn. I have not tested this. The 2.5% of rounds with K=3 at concurrency 32 (F-003 result) fits it, but does not show it.
+
+This PR does not answer the open F-003 question about whether a request still reading its prompt gets draft tokens.
+
+**Noted for later, not a finding.** The existing test `test_scheduler_uses_dsd_k_based_on_number_of_scheduled_requests` passes under both rules, because in it every running request is scheduled. After the PR its name no longer matches the rule.
+
+**Upstream state.** vLLM 0.34.0 and PR #66647, as seen on 25 Nov 2026.
+
+**Re-check.** Before any upgrade from 0.33.0, and when #66647 is merged or closed.
