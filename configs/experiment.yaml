@@ -8,6 +8,7 @@ max_model_len: 4096
 
 # Server settings every arm shares. Session 1 used the first two (see scripts/lib.sh).
 server:
+  model_runner: v2               # decided 26 Nov 2026, NOT yet checked on the A40. Session 1 used v1. Fallback if the check fails: v1 with cudagraph_mode PIECEWISE on every arm
   max_num_seqs: 64
   gpu_memory_utilization: 0.90
   prefix_caching: false          # decided 25 Nov 2026: off for every arm. Session 1 ran with it on (F-005)

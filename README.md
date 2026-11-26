@@ -75,7 +75,7 @@ cd llm-serving-lab
 bash scripts/setup.sh
 ```
 
-Setup took about 5 minutes in session 1. Then run the session steps one at a time, and read each result before the next one. Run `bash scripts/validate_gpu.sh` with no step name to see the list. Every command a step runs is saved in `/workspace/logs/commands.log`, and the scripts refuse to start new work 3 hours after setup began. Every server starts with prefix caching off, so all arms are treated the same. Session 1 ran with it on, the vLLM default. `LAB_PREFIX_CACHING=on` brings that back.
+Setup took about 5 minutes in session 1. Then run the session steps one at a time, and read each result before the next one. Run `bash scripts/validate_gpu.sh` with no step name to see the list. Every command a step runs is saved in `/workspace/logs/commands.log`, and the scripts refuse to start new work 3 hours after setup began. Every server starts with prefix caching off, a 2048-token budget and Model Runner V2, so all arms are treated the same. Session 1 ran with caching on and Model Runner V1. `LAB_PREFIX_CACHING=on` and `LAB_RUNNER=v1` bring that back. V2 has not been run on the A40 yet.
 
 Before stopping the pod, stop the server and pack the results:
 

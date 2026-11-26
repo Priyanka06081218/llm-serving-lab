@@ -87,6 +87,7 @@ def test_every_arm_gets_the_same_controls(tmp_path):
     for command in commands:
         assert "--max-num-batched-tokens 2048" in command
         assert "--disable-prefix-caching" in command
+        assert "VLLM_USE_V2_MODEL_RUNNER=1" in command
 
 
 def test_arms_differ_only_in_the_speculative_config(tmp_path):
@@ -94,3 +95,21 @@ def test_arms_differ_only_in_the_speculative_config(tmp_path):
     assert "--speculative-config" not in off
     assert off.rstrip() == k3.split("--speculative-config")[0].rstrip()
     assert off.rstrip() == dynamic.split("--speculative-config")[0].rstrip()
+
+
+def test_model_runner_is_v2_by_default_and_always_set(tmp_path):
+    assert bash(f'source "{LIB}"; runner_env', tmp_path).stdout.strip() == "VLLM_USE_V2_MODEL_RUNNER=1"
+
+
+def test_model_runner_can_go_back_to_v1_to_repeat_session_1(tmp_path):
+    out = bash(f'LAB_RUNNER=v1; source "{LIB}"; runner_env', tmp_path).stdout.strip()
+    assert out == "VLLM_USE_V2_MODEL_RUNNER=0"
+
+
+def test_model_runner_setting_must_be_v1_or_v2(tmp_path):
+    result = subprocess.run(["bash", "-c", f'LAB_RUNNER=V3; source "{LIB}"; runner_env'],
+                            capture_output=True, text=True,
+                            env={"WORK": str(tmp_path), "PATH": "/usr/bin:/bin"})
+    assert result.returncode == 1
+    assert result.stdout == ""
+    assert "must be 'v1' or 'v2'" in result.stderr

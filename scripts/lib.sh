@@ -73,6 +73,20 @@ cache_flag() {
   esac
 }
 
+# runner_env: which model runner every server uses. V2 for every arm, because on V1
+# vLLM 0.33.0 forces Dynamic SD into PIECEWISE graphs while the other arms keep full
+# graphs (vllm/config/vllm.py, _maybe_override_dynamic_sd_cudagraph_mode). The value
+# is always set, never left to the default, so a server that V2 cannot run fails
+# loudly instead of quietly falling back to V1. Not yet checked on the A40.
+# LAB_RUNNER=v1 gives the session 1 runner back.
+runner_env() {
+  case "${LAB_RUNNER:-v2}" in
+    v2) echo "VLLM_USE_V2_MODEL_RUNNER=1" ;;
+    v1) echo "VLLM_USE_V2_MODEL_RUNNER=0" ;;
+    *) echo "LAB_RUNNER must be 'v1' or 'v2', not '${LAB_RUNNER}'." >&2; return 1 ;;
+  esac
+}
+
 # start_server NAME [extra vllm arguments]
 # Starts vLLM in the background, saves its output to a log file, and waits
 # until the server answers. Every arm gets the same base settings, so the
@@ -80,14 +94,15 @@ cache_flag() {
 start_server() {
   local name="$1"; shift
   session_guard || return 1
-  local cache
+  local cache runner
   cache=$(cache_flag) || return 1
+  runner=$(runner_env) || return 1
   if [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then
     echo "A server is already running (pid $(cat "$PID_FILE")). Run the stop step first."
     return 1
   fi
   local log="$LOG_DIR/server_${name}.log"
-  local cmd=(env VLLM_USE_V2_MODEL_RUNNER=0 vllm serve "$MODEL"
+  local cmd=(env "$runner" vllm serve "$MODEL"
     --max-model-len 4096 --gpu-memory-utilization 0.90 --max-num-seqs 64
     --max-num-batched-tokens 2048
     --port "$PORT" "$cache" "$@")
