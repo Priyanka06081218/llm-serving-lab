@@ -236,3 +236,39 @@ This PR does not answer the open F-003 question about whether a request still re
 **Upstream state.** vLLM 0.34.0 and PR #66647, as seen on 25 Nov 2026.
 
 **Re-check.** Before any upgrade from 0.33.0, and when #66647 is merged or closed.
+
+## Setup changes after session 1 (26 Nov 2026)
+
+This entry records changes to the experiment setup that I made after session 1. It does not change F-001 to F-005. The session 1 numbers stay as preliminary findings, because they were measured with the old setup. The next results should be described as measurements with the new setup. They are not corrected versions of session 1.
+
+**What changed**
+
+| Setting | Session 1 | From now on |
+|---|---|---|
+| Prefix caching | On (the vLLM default) | Off for every arm |
+| `max_num_batched_tokens` | Not set (2048 by default, by my reading of the code) | 2048, set explicitly for every arm |
+| Model runner | V1 (`VLLM_USE_V2_MODEL_RUNNER=0`) | V2 (`=1`), **not yet checked on the A40** |
+
+vLLM 0.33.0, Qwen3-8B with the EAGLE-3 speculator, one A40, `--max-num-seqs 64` and `--max-model-len 4096` stay the same. So do the four arms and the research question.
+
+**Why prefix caching is off.** In session 1 the nested prompt sets were repeated across runs, and I saw a hit rate of about 52% on the live page (not saved). I did not check where those hits came from. Turning it off means a fresh server and a warm one behave the same. This also changes one code path: with caching on, EAGLE uses extra lookahead block hashes (`vllm/config/vllm.py`, `num_hash_lookahead_tokens`). So the new runs are not the session 1 runs with the cache hits removed. Results must say they were measured with caching off.
+
+**Why the token budget is explicit.** With a speculative config, vLLM sets `max_num_scheduled_tokens` equal to `max_num_batched_tokens` (`vllm/config/vllm.py`, `_set_max_num_scheduled_tokens`). Without one, the scheduler falls back to `max_num_batched_tokens` (`vllm/v1/core/sched/scheduler.py`, line 139). For this GPU the default is 2048, so I think all arms had the same budget in session 1, but the baseline log did not print it. Setting it explicitly removes the question. I will record the resolved values at startup.
+
+**Why V2.** On V1, vLLM 0.33.0 changes Dynamic SD's CUDA graph mode from `FULL_AND_PIECEWISE` to `PIECEWISE` (`vllm/config/vllm.py`, `_maybe_override_dynamic_sd_cudagraph_mode`). The warning says "for reliability" and points to V2. The Dynamic SD docs say full graphs work only with Model Runner V2. The other arms kept full graphs in session 1, so the Dynamic SD arm differed in two ways: its K policy and its graph mode. On V2 the code captures one full decode graph for each K the table can give (`vllm/v1/worker/gpu/cudagraph_utils.py`). V1 is also removed in vLLM 0.34.0, so V1 results would be about a runner that no longer exists.
+
+I used V1 in session 1 because the Dynamic SD docs' examples set `VLLM_USE_V2_MODEL_RUNNER=0` (F-002). It was not a requirement. By my reading of `use_v2_model_runner`, V2 is the default in 0.33.0 when Triton is installed and nothing in the config is unsupported, and EAGLE-3 is not on the unsupported list. That is code reading. I have not run it. The scripts set the value to 1 explicitly, so if V2 cannot run a server, it fails loudly and does not fall back to V1.
+
+**What V2 has to show before I use it.** On the A40, with this exact model and speculator:
+- All four arms start with V2.
+- The resolved CUDA graph mode is recorded for every arm. V2 for every arm does not by itself guarantee the same mode, so I check it. If the modes differ, I work out a common supported setting before I compare any speed numbers.
+- Static K=1, static K=3 and Dynamic SD all produce drafts.
+- With the Dynamic SD table `[[1,16,3],[17,64,1]]`: draft tokens per draft is close to 3 at concurrency 4 and close to 1 at concurrency 32, as in F-003.
+- No failed requests.
+- The KV cache and GPU memory are still large enough.
+
+**If V2 fails.** I use V1 with `PIECEWISE` on every arm, so only the K policy differs. Results from V1 with each arm's own default graph mode would be labelled as end-to-end configuration comparisons, not as measurements of the Dynamic SD policy. The scripts do not have this fallback yet. I will add it only if V2 fails.
+
+**Upstream state.** vLLM 0.33.0 (code read on 25 and 26 Nov 2026). V2 has not been run on the A40.
+
+**Re-check.** After the V2 check on the A40, and after any vLLM upgrade.
